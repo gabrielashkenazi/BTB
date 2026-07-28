@@ -1,0 +1,1648 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Be The Bank</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800&family=IBM+Plex+Sans+Hebrew:wght@400;500;600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          paper: '#FAFAF8',
+          ink: '#14171F',
+          brand: '#FCA5A5',
+          branddark: '#F48B8B',
+          brandtext: '#C2447A',
+          growth: '#1F7A5C',
+          amber: '#B8792E',
+          danger: '#B8433C',
+          line: '#E6E2D9'
+        },
+        fontFamily: { display: ['Rubik','sans-serif'], body: ['IBM Plex Sans Hebrew','sans-serif'] }
+      }
+    }
+  }
+</script>
+<style>
+  body{ font-family:'IBM Plex Sans Hebrew',sans-serif; background:#FAFAF8; color:#14171F; }
+  .disp{ font-family:'Rubik',sans-serif; font-weight:700; }
+  .material-symbols-outlined{ font-variation-settings:'FILL' 0,'wght' 400; }
+  .screen{ display:none; }
+  .screen.active{ display:block; }
+  .card{ background:#fff; border:1px solid #E6E2D9; border-radius:1rem; }
+  .btn-brand{ background:#FCA5A5; color:#14171F; }
+  .btn-brand:hover{ background:#F48B8B; }
+  .nav-item{ display:flex; align-items:center; gap:.65rem; padding:.6rem .9rem; border-radius:.6rem; color:#5b5f6b; font-weight:500; font-size:.88rem; cursor:pointer; transition:all .15s; }
+  .nav-item:hover{ background:#F4F2FC; color:#14171F; }
+  .nav-item.active{ background:#FCA5A5; color:#14171F; font-weight:700; }
+  input[type=range]{ -webkit-appearance:none; width:100%; background:transparent; }
+  input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:3px; background:linear-gradient(to left, #FCA5A5 var(--pct,10%), #E6E2D9 var(--pct,10%)); }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:2.5px solid #FCA5A5; margin-top:-7px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.15); }
+  .pill{ display:inline-flex; align-items:center; gap:.3rem; font-size:11px; font-weight:600; padding:.2rem .55rem; border-radius:9999px; }
+  .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:#14171F; color:#fff; padding:.8rem 1.4rem; border-radius:.7rem; font-size:.85rem; font-weight:500; opacity:0; pointer-events:none; transition:all .3s; z-index:200; }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  ::-webkit-scrollbar{ height:6px; width:6px; }
+  ::-webkit-scrollbar-thumb{ background:#E6E2D9; border-radius:3px; }
+
+  /* ---------- Mobile preview toggle (for demoing the mobile layout on a desktop browser) ---------- */
+  #view-toggle-btn{ position:fixed; top:14px; left:14px; z-index:300; background:#14171F; color:#fff; border-radius:9999px; padding:.5rem 1rem; font-size:.78rem; font-weight:600; display:flex; align-items:center; gap:.4rem; box-shadow:0 4px 14px rgba(0,0,0,.25); cursor:pointer; border:none; }
+  #view-toggle-btn:hover{ background:#2b2f3a; }
+  @media (max-width: 1023px){ #view-toggle-btn{ display:none; } }
+
+  #mobile-drawer{ transform:translateX(100%); transition:transform .25s ease; }
+  #mobile-drawer.open{ transform:translateX(0); }
+
+  html.force-mobile body{ background:#E6E2D9; }
+  html.force-mobile #app-root{
+    max-width:390px; margin:70px auto 40px; border:10px solid #14171F; border-radius:2.2rem;
+    box-shadow:0 25px 70px rgba(0,0,0,.35); overflow-y:auto; overflow-x:hidden;
+    height:800px; position:relative; background:#FAFAF8; transform:translateZ(0);
+  }
+  html.force-mobile aside.desktop-sidebar{ display:none !important; }
+  html.force-mobile main{ margin-right:0 !important; padding-left:1rem; padding-right:1rem; max-width:100% !important; }
+  html.force-mobile #manager-popover{ top:64px !important; bottom:auto !important; right:1rem !important; }
+  html.force-mobile #profit-net{ font-size:1.5rem !important; }
+  html.force-mobile #income-required-amount{ font-size:1.25rem !important; }
+  html.force-mobile #total-deposits-stat{ font-size:1.125rem !important; }
+  html.force-mobile #hamburger-btn{ display:flex !important; }
+  html.force-mobile #settings-btn-header{ display:none !important; }
+
+  /* ---------- desktop-only vs mobile-only route displays ---------- */
+  .mobile-only-routes{ display:none; }
+  .desktop-only-routes{ display:block; }
+  @media (max-width: 1023px){
+    .mobile-only-routes{ display:block; }
+    .desktop-only-routes{ display:none; }
+  }
+  html.force-mobile .mobile-only-routes{ display:block !important; }
+  html.force-mobile .desktop-only-routes{ display:none !important; }
+
+  /* ---------- rows that should stack vertically on mobile instead of squeezing side by side ---------- */
+  .stack-mobile{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; }
+  @media (max-width: 1023px){
+    .stack-mobile{ flex-direction:column; align-items:flex-start; }
+  }
+  html.force-mobile .stack-mobile{ flex-direction:column !important; align-items:flex-start !important; }
+  html.force-mobile #breakdown-grid{ grid-template-columns:1fr !important; }
+  html.force-mobile #savings-results-grid{ grid-template-columns:1fr !important; }
+  @media (max-width: 1023px){
+    #manager-popover{ top:64px !important; bottom:auto !important; right:1rem !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MOBILE/DESKTOP PREVIEW TOGGLE (for demoing the mobile layout) -->
+<button id="view-toggle-btn" onclick="toggleMobilePreview()">
+  <span class="material-symbols-outlined text-base" id="view-toggle-icon">smartphone</span>
+  <span id="view-toggle-label">תצוגת מובייל</span>
+</button>
+
+<div class="flex min-h-screen" id="app-root">
+
+  <!-- MOBILE DRAWER NAV -->
+  <div class="hidden fixed inset-0 bg-black/40 z-40" id="mobile-drawer-backdrop" onclick="closeMobileDrawer()"></div>
+  <div class="fixed top-0 right-0 h-full w-64 bg-white z-50 p-5" id="mobile-drawer">
+    <div class="flex items-center justify-between mb-6">
+      <div class="flex items-center gap-2">
+        <span class="text-base font-bold text-ink whitespace-nowrap">Be The Bank,</span>
+      </div>
+      <button class="text-slate-400" onclick="closeMobileDrawer()"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <nav class="flex flex-col gap-1" id="mobile-nav-items">
+      <div class="nav-item" data-screen="dashboard" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">space_dashboard</span>דשבורד</div>
+      <div class="nav-item" data-screen="invest" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">trending_up</span>תכנון השקעה</div>
+      <div class="nav-item" data-screen="income" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">monetization_on</span>הכנסה חודשית קבועה</div>
+      <div class="nav-item" data-screen="savings" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">timeline</span>חיסכון לכל מטרה</div>
+      <div class="nav-item" data-screen="deposits" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">receipt_long</span>ההפקדות שלי</div>
+      <div class="nav-item" data-screen="onboarding" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">verified_user</span>אימות והכרות</div>
+      <div class="nav-item" data-screen="faq" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">help</span>מרכז המידע</div>
+    </nav>
+    <div class="mt-8 pt-6 border-t border-line space-y-1">
+      <button class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-right">
+        <span class="material-symbols-outlined text-slate-500">settings</span>
+        <span class="text-sm font-medium">הגדרות</span>
+      </button>
+      <button class="w-full flex items-center gap-2 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-right" id="manager-btn-mobile" onclick="toggleManager()">
+        <div class="w-9 h-9 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold text-xs flex-shrink-0">נ.כ</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-semibold truncate">נאור כהן</div>
+          <div class="text-[10px] text-slate-400">מנהל התיק שלך</div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <aside class="desktop-sidebar hidden lg:flex fixed right-0 top-0 h-full w-[220px] bg-white border-l border-line flex-col py-6 z-30">
+    <div class="px-5 mb-8">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-lg font-bold text-ink whitespace-nowrap">Be The Bank,</span>
+        <span class="text-[9px] font-medium border border-ink px-1 py-0.5 leading-none tracking-wide">BTB ISRAEL</span>
+      </div>
+    </div>
+    <nav class="flex flex-col gap-1 px-3">
+      <div class="nav-item active" data-screen="dashboard"><span class="material-symbols-outlined text-lg">space_dashboard</span>דשבורד</div>
+      <div class="nav-item" data-screen="invest"><span class="material-symbols-outlined text-lg">trending_up</span>תכנון השקעה</div>
+      <div class="nav-item" data-screen="income"><span class="material-symbols-outlined text-lg">monetization_on</span>הכנסה חודשית קבועה</div>
+      <div class="nav-item" data-screen="savings"><span class="material-symbols-outlined text-lg">timeline</span>חיסכון לכל מטרה</div>
+      <div class="nav-item" data-screen="deposits"><span class="material-symbols-outlined text-lg">receipt_long</span>ההפקדות שלי</div>
+      <div class="nav-item" data-screen="onboarding"><span class="material-symbols-outlined text-lg">verified_user</span>אימות והכרות</div>
+      <div class="nav-item" data-screen="faq"><span class="material-symbols-outlined text-lg">help</span>מרכז המידע</div>
+    </nav>
+    <div class="mt-auto px-3 space-y-3">
+      <button class="w-full flex items-center gap-2 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-right" id="manager-btn" onclick="toggleManager()">
+        <div class="w-8 h-8 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold text-xs flex-shrink-0">נ.כ</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-semibold truncate">נאור כהן</div>
+          <div class="text-[10px] text-slate-400">מנהל התיק שלך</div>
+        </div>
+        <span class="material-symbols-outlined text-slate-300 text-base">chevron_left</span>
+      </button>
+      <a class="flex items-center gap-2 px-2.5 text-[11px] text-slate-400 hover:text-brandtext transition-colors" href="#">
+        <span class="material-symbols-outlined text-sm">smartphone</span>גם באפליקציה — הורידו את BTB
+      </a>
+    </div>
+  </aside>
+
+  <!-- MANAGER POPOVER -->
+  <div class="hidden fixed bottom-24 right-[236px] w-64 card shadow-xl p-4 z-40" id="manager-popover">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-11 h-11 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold">נ.כ</div>
+      <div>
+        <div class="font-semibold text-sm">נאור כהן</div>
+        <a class="text-xs text-brandtext" href="mailto:naorc@btbisrael.co.il">naorc@btbisrael.co.il</a>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <a class="flex-1 flex flex-col items-center gap-1 bg-growth/5 border border-growth/20 rounded-lg py-2" href="https://wa.me/972507599662" target="_blank" rel="noopener">
+        <span class="material-symbols-outlined text-growth text-lg">chat</span>
+        <span class="text-[11px] font-semibold" dir="ltr">050-7599662</span>
+      </a>
+      <a class="flex-1 flex flex-col items-center gap-1 bg-slate-50 border border-line rounded-lg py-2" href="tel:0732073277">
+        <span class="material-symbols-outlined text-slate-600 text-lg">call</span>
+        <span class="text-[11px] font-semibold" dir="ltr">073-2073277</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <main class="flex-1 mr-0 lg:mr-[220px] px-5 lg:px-10 py-6 lg:py-8 max-w-5xl">
+
+    <header class="flex items-center justify-between mb-7">
+      <div class="flex items-center gap-3">
+        <button class="lg:hidden w-9 h-9 rounded-full border border-line flex items-center justify-center text-slate-600 flex-shrink-0" id="hamburger-btn" onclick="openMobileDrawer()">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <h1 class="disp text-2xl lg:text-3xl font-bold" id="page-title">דשבורד</h1>
+      </div>
+      <button class="hidden lg:flex w-9 h-9 rounded-full border border-line items-center justify-center text-slate-500 hover:bg-slate-50" id="settings-btn-header"><span class="material-symbols-outlined text-lg">settings</span></button>
+    </header>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="screen active" id="screen-dashboard">
+      <p class="text-slate-500 mb-6 -mt-3">בוקר טוב, גבריאל</p>
+
+      <!-- JOURNEY (signature element) -->
+      <div class="card p-6 lg:p-8 mb-6" id="journey-card"><!-- injected by JS --></div>
+
+      <!-- DIVERSIFICATION VIDEO TILE (BTB's own homepage animation) -->
+      <div class="card overflow-hidden mb-3">
+        <video class="w-full h-32 object-cover" autoplay loop muted playsinline>
+          <source src="https://www.btbisrael.co.il/wp-content/uploads/2025/05/switching-machines-2.42_1.mp4" type="video/mp4">
+        </video>
+        <div class="p-3 text-center">
+          <div class="font-semibold text-sm">ההשקעה שלכם מושקעת באלפי עסקים</div>
+        </div>
+      </div>
+
+      <!-- TOTAL DEPOSITS STAT TILE -->
+      <div class="card p-5 text-center mb-3">
+        <div class="text-xs text-slate-500 mb-1">סך ההפקדות שניתנו על ידי משקיעי BTB לטובת הלוואות</div>
+        <div class="disp text-lg sm:text-2xl font-bold text-growth break-words" id="total-deposits-stat" dir="ltr">11,031,084,929 ₪</div>
+      </div>
+
+      <!-- ROUTES TEASER TILE (collapsed by default, matches the cross-sell tile style) -->
+      <div class="card p-5 flex items-center justify-between gap-4 mb-3">
+        <div>
+          <div class="font-semibold text-sm mb-1">מכירים את המסלולים המצוינים שלנו?</div>
+          <div class="text-xs text-slate-400">בואו להכיר אותם</div>
+        </div>
+        <button class="text-brandtext text-sm font-semibold flex items-center gap-1 flex-shrink-0" onclick="toggleRoutesTeaser()">
+          <span id="routes-teaser-label">גלו עוד</span>
+          <span class="material-symbols-outlined text-base" id="routes-teaser-icon">arrow_back</span>
+        </button>
+      </div>
+
+      <div class="hidden mb-6" id="routes-expanded-section">
+        <!-- mobile: single-card carousel with arrows -->
+        <div class="mobile-only-routes mb-3">
+          <div class="flex items-center gap-2 mb-2">
+            <button class="w-8 h-8 rounded-full border border-line flex items-center justify-center flex-shrink-0 hover:bg-slate-50" onclick="carouselMove('dashboard',-1)"><span class="material-symbols-outlined text-lg">chevron_right</span></button>
+            <div class="flex-1 min-w-0" id="dashboard-carousel"></div>
+            <button class="w-8 h-8 rounded-full border border-line flex items-center justify-center flex-shrink-0 hover:bg-slate-50" onclick="carouselMove('dashboard',1)"><span class="material-symbols-outlined text-lg">chevron_left</span></button>
+          </div>
+          <div class="flex justify-center gap-1.5" id="dashboard-carousel-dots"></div>
+        </div>
+
+        <!-- desktop: horizontal-scroll of all routes -->
+        <div class="desktop-only-routes">
+          <div class="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1" id="routes-carousel" style="scroll-snap-type:x mandatory;"></div>
+        </div>
+      </div>
+
+      <!-- CROSS-SELL ROW -->
+      <div class="grid grid-cols-1 gap-4">
+        <div class="card p-5 flex items-center justify-between gap-4">
+          <div>
+            <div class="font-semibold text-sm mb-1">רוצים הכנסה חודשית קבועה?</div>
+            <div class="text-xs text-slate-400">חשבו כמה להשקיע כדי לקבל סכום קבוע כל חודש</div>
+          </div>
+          <button class="text-brandtext text-sm font-semibold flex items-center gap-1 flex-shrink-0" data-goto="income">גלו עוד<span class="material-symbols-outlined text-base">arrow_back</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INVESTMENT PLANNING ============ -->
+    <section class="screen" id="screen-invest">
+
+      <!-- STEP 1: AMOUNT -->
+      <div class="card p-5 mb-4">
+        <div class="text-sm font-medium text-slate-500 text-center mb-2">סכום הפקדה</div>
+        <div class="flex items-center justify-center gap-1 mb-3">
+          <span class="disp text-3xl font-bold" id="amount-display">100,000</span>
+          <span class="text-lg text-slate-400">₪</span>
+          <button class="text-slate-300 hover:text-brandtext ms-1" onclick="startEdit('amount')"><span class="material-symbols-outlined text-base">edit</span></button>
+        </div>
+        <div class="hidden items-center justify-center gap-1.5 mb-3" id="amount-edit-wrap">
+          <input class="w-28 border border-line rounded-lg px-2 py-1 text-sm font-semibold text-center" id="amount-edit-input" type="number">
+          <button class="text-growth" onclick="commitEdit('amount')"><span class="material-symbols-outlined text-lg">check</span></button>
+          <button class="text-slate-400" onclick="cancelEdit('amount')"><span class="material-symbols-outlined text-lg">close</span></button>
+        </div>
+        <div class="relative mt-6">
+          <button class="absolute -top-5 left-0 flex items-center gap-1 text-[10px] font-medium text-slate-400 hover:text-brandtext transition-colors" onclick="toggleStage()" id="stage-toggle">
+            <span class="material-symbols-outlined text-xs">swap_vert</span>
+            מעל מיליון ₪
+          </button>
+          <input class="w-full" id="investment-slider" max="1000" min="0" type="range" value="100">
+        </div>
+        <div class="flex justify-between mt-2 text-[11px] text-slate-400">
+          <span id="range-start">100 ₪</span>
+          <span id="range-end">1,000,000 ₪</span>
+        </div>
+        <button class="btn-brand w-full py-3 rounded-xl font-semibold mt-4" id="amount-continue-btn" onclick="revealStep2()">המשך לבחירת מסלול</button>
+      </div>
+
+      <!-- STEP 2: ROUTE + SUMMARY (revealed after amount is confirmed) -->
+      <div class="hidden" id="step2-container">
+
+        <!-- mobile: single-card carousel with arrows -->
+        <div class="mobile-only-routes mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <button class="w-8 h-8 rounded-full border border-line flex items-center justify-center flex-shrink-0 hover:bg-slate-50" onclick="carouselMove('invest',-1)"><span class="material-symbols-outlined text-lg">chevron_right</span></button>
+            <div class="flex-1 min-w-0" id="invest-carousel"></div>
+            <button class="w-8 h-8 rounded-full border border-line flex items-center justify-center flex-shrink-0 hover:bg-slate-50" onclick="carouselMove('invest',1)"><span class="material-symbols-outlined text-lg">chevron_left</span></button>
+          </div>
+          <div class="flex justify-center gap-1.5" id="invest-carousel-dots"></div>
+        </div>
+
+        <!-- desktop: hero + muted strip (hero card gets an inline expand button, same as mobile) -->
+        <div class="desktop-only-routes">
+          <div class="flex gap-2 overflow-x-auto pb-1 mb-6" id="route-row"></div>
+        </div>
+
+        <div class="card p-5 lg:p-6">
+          <div class="stack-mobile mb-4">
+            <span class="font-semibold text-sm">כיצד תיראה ההשקעה שלי?</span>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-400">תקופה (שנים)</span>
+              <div class="flex bg-slate-50 border border-line rounded-lg p-0.5" id="duration-selector"></div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center" id="breakdown-grid">
+            <div class="text-sm">
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-slate-500">שווי ההשקעה שלי ברוטו</span>
+                <span class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-growth bg-growth/10 px-1.5 py-0.5 rounded-full whitespace-nowrap" id="profit-return-pct">+0%</span>
+                  <span class="font-semibold text-base" id="profit-portfolio">₪0</span>
+                </span>
+              </div>
+              <button class="w-full flex justify-between items-center py-1.5" onclick="toggleExpenses()">
+                <span class="text-slate-500">הוצאות</span>
+                <span class="flex items-center gap-1">
+                  <span id="profit-expenses">-₪0</span>
+                  <span class="material-symbols-outlined text-base text-slate-400" id="expenses-chevron">expand_more</span>
+                </span>
+              </button>
+              <div class="hidden pe-3 space-y-1 border-e-2 border-line" id="expenses-detail">
+                <div class="flex justify-between text-xs text-slate-500 py-1"><span>דמי ניהול</span><span id="profit-mgmt">-₪0</span></div>
+                <div class="flex justify-between text-xs text-slate-500 py-1"><span>הפרשה לקופה הדדית</span><span id="profit-fund">-₪0</span></div>
+                <p class="text-[11px] text-slate-400 pt-2">* ההפרשה לקופה ההדדית מחושבת לשנתיים הראשונות בלבד</p>
+              </div>
+            </div>
+            <div class="bg-growth/5 border border-growth/15 rounded-xl p-5 text-center">
+              <div class="text-xs text-growth font-semibold mb-1">רווח נטו צפוי</div>
+              <div class="disp text-2xl sm:text-4xl font-bold text-growth break-words" id="profit-net">₪0</div>
+              <p class="text-[10px] text-slate-400 mt-1">אינו כולל 15% מס רווחי הון</p>
+            </div>
+          </div>
+          <button class="btn-brand w-full py-3.5 rounded-xl font-semibold mt-5" id="invest-cta">המשך להפקדה</button>
+        </div>
+
+        <div class="card p-4 mt-4 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-brandtext">monetization_on</span>לא בטוחים כמה להשקיע? חשבו לפי ההכנסה החודשית שאתם רוצים</div>
+          <button class="text-brandtext text-sm font-semibold flex-shrink-0" data-goto="income">למחשבון →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PASSIVE INCOME ============ -->
+    <section class="screen" id="screen-income">
+
+      <div class="card p-5 mb-4">
+        <p class="text-sm text-slate-800 font-bold leading-relaxed text-center">הרווח שנוצר מההשקעה שלכם נפדה כל חודש ומועבר ישירות לחשבון הבנק — כמו הכנסה קבועה, בלי לגעת בקרן.</p>
+      </div>
+
+      <div class="card p-5 mb-4">
+        <div class="text-sm font-medium text-slate-500 text-center mb-2">הכנסה חודשית רצויה</div>
+        <div class="flex items-center justify-center gap-1 mb-3">
+          <span class="disp text-3xl font-bold" id="income-display">3,000</span>
+          <span class="text-lg text-slate-400">₪</span>
+          <button class="text-slate-300 hover:text-brandtext ms-1" onclick="startEdit('income')"><span class="material-symbols-outlined text-base">edit</span></button>
+        </div>
+        <div class="hidden items-center justify-center gap-1.5 mb-3" id="income-edit-wrap">
+          <input class="w-28 border border-line rounded-lg px-2 py-1 text-sm font-semibold text-center" id="income-edit-input" type="number">
+          <button class="text-growth" onclick="commitEdit('income')"><span class="material-symbols-outlined text-lg">check</span></button>
+          <button class="text-slate-400" onclick="cancelEdit('income')"><span class="material-symbols-outlined text-lg">close</span></button>
+        </div>
+        <input class="w-full" id="income-slider" max="1000" min="0" type="range" value="120">
+        <div class="flex justify-between mt-2 text-[11px] text-slate-400">
+          <span>100 ₪</span>
+          <span>50,000 ₪</span>
+        </div>
+        <button class="btn-brand w-full py-3 rounded-xl font-semibold mt-4" id="income-continue-btn" onclick="revealIncomeStep2()">כמה נדרש להשקיע?</button>
+      </div>
+
+      <!-- STEP 2: routes + required investment (revealed after clicking the button above) -->
+      <div class="hidden" id="income-step2-container">
+
+        <!-- mobile: single-card carousel with arrows -->
+        <div class="mobile-only-routes mb-4">
+          <div class="flex items-center gap-2 mb-2">
+            <button class="w-8 h-8 rounded-full border border-line flex items-center justify-center flex-shrink-0 hover:bg-slate-50" onclick="carouselMove('income',-1)"><span class="material-symbols-outlined text-lg">chevron_right</span></button>
+            <div class="flex-1 min-w-0" id="income-carousel"></div>
+            <button class="w-8 h-8 rounded-full border border-line flex items-center justify-center flex-shrink-0 hover:bg-slate-50" onclick="carouselMove('income',1)"><span class="material-symbols-outlined text-lg">chevron_left</span></button>
+          </div>
+          <div class="flex justify-center gap-1.5" id="income-carousel-dots"></div>
+        </div>
+
+        <!-- desktop: hero + muted strip (hero card gets an inline expand button, same as mobile) -->
+        <div class="desktop-only-routes">
+          <div class="flex gap-2 overflow-x-auto pb-1 mb-6" id="income-route-row"></div>
+        </div>
+
+        <!-- Clear summary of the required deposit for the currently selected route -->
+        <div class="card p-5 mb-4 text-center bg-brand/10 border-brand/40">
+          <div class="text-xs font-semibold text-slate-500 mb-1">סכום ההפקדה הנדרש</div>
+          <div class="disp text-xl sm:text-3xl font-bold break-words" id="income-required-amount">₪0</div>
+          <div class="text-xs text-slate-400 mt-1" id="income-required-caption">במסלול B-MATCH</div>
+        </div>
+
+        <button class="btn-brand w-full py-3.5 rounded-xl font-semibold" id="income-cta">המשך להפקדה</button>
+
+        <div class="card p-4 mt-4 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2 text-sm"><span class="material-symbols-outlined text-brandtext">trending_up</span>רוצים להנות מריבית מצטברת? עברו לתכנון השקעה</div>
+          <button class="text-brandtext text-sm font-semibold flex-shrink-0" data-goto="invest">לתכנון השקעה →</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LONG-TERM SAVINGS CALCULATOR ============ -->
+    <section class="screen" id="screen-savings">
+
+      <div class="card p-5 mb-4">
+        <p class="text-sm text-slate-600 leading-relaxed text-center">הקימו תכנית חיסכון לטווח ארוך: בחרו יעד, סכום התחלתי והפקדה חודשית קבועה, עם צמיחה לפי המסלול שתבחרו.</p>
+      </div>
+
+      <!-- Built-in plans (prominent, distinct callout) -->
+      <div class="rounded-2xl p-5 mb-4 border-2 border-brand" style="background:linear-gradient(135deg, rgba(252,165,165,0.18), rgba(252,165,165,0.04));">
+        <div class="flex items-center gap-2 mb-1">
+          <span class="material-symbols-outlined text-brandtext">auto_awesome</span>
+          <span class="font-bold text-sm">תכניות מובנות</span>
+        </div>
+        <p class="text-xs text-slate-500 mb-3">בחרו יעד, ונציע לכם תכנית השקעה מתאימה</p>
+        <div class="flex flex-wrap gap-2" id="savings-preset-chips">
+          <button class="px-4 py-2 rounded-full bg-white border border-brand text-sm font-semibold hover:shadow-md transition-shadow flex items-center gap-1.5" onclick="applySavingsPreset('child_million')">
+            <span class="material-symbols-outlined text-base text-brandtext">child_care</span>מיליון ₪ לכל ילד
+          </button>
+          <button class="px-4 py-2 rounded-full bg-white border border-brand text-sm font-semibold hover:shadow-md transition-shadow flex items-center gap-1.5" onclick="applySavingsPreset('bar_mitzvah')">
+            <span class="material-symbols-outlined text-base text-brandtext">celebration</span>בר/בת מצווה
+          </button>
+          <button class="px-4 py-2 rounded-full bg-white border border-brand text-sm font-semibold hover:shadow-md transition-shadow flex items-center gap-1.5" onclick="applySavingsPreset('wedding')">
+            <span class="material-symbols-outlined text-base text-brandtext">favorite</span>חתונה
+          </button>
+          <button class="px-4 py-2 rounded-full bg-white border border-brand text-sm font-semibold hover:shadow-md transition-shadow flex items-center gap-1.5" onclick="applySavingsPreset('apartment')">
+            <span class="material-symbols-outlined text-base text-brandtext">home</span>דירה
+          </button>
+          <button class="px-4 py-2 rounded-full bg-white border border-brand text-sm font-semibold hover:shadow-md transition-shadow flex items-center gap-1.5" onclick="applySavingsPreset('car')">
+            <span class="material-symbols-outlined text-base text-brandtext">directions_car</span>רכב
+          </button>
+          <button class="px-4 py-2 rounded-full bg-white border border-brand text-sm font-semibold hover:shadow-md transition-shadow flex items-center gap-1.5" onclick="applySavingsPreset('vacation')">
+            <span class="material-symbols-outlined text-base text-brandtext">flight_takeoff</span>חופשה
+          </button>
+          <button class="px-4 py-2 rounded-full bg-white border border-brand text-sm font-semibold hover:shadow-md transition-shadow flex items-center gap-1.5" onclick="toggleCustomGoalForm()">
+            <span class="material-symbols-outlined text-base text-brandtext">edit_note</span>אחר
+          </button>
+        </div>
+
+        <!-- Custom goal ("אחר") inline form -->
+        <div class="hidden mt-4 pt-4 border-t border-brand/30" id="custom-goal-form">
+          <div class="grid grid-cols-2 gap-3 mb-3">
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">סכום היעד (₪)</label>
+              <input class="w-full border border-line rounded-lg px-3 py-2 text-sm" id="custom-goal-target" type="number" placeholder="לדוגמה: 80000" min="1000" step="1000">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-500 mb-1">בעוד כמה שנים</label>
+              <input class="w-full border border-line rounded-lg px-3 py-2 text-sm" id="custom-goal-years" type="number" placeholder="לדוגמה: 7" min="1" max="30" step="1">
+            </div>
+          </div>
+          <button class="btn-brand w-full py-2.5 rounded-xl font-semibold text-sm" onclick="applyCustomGoal()">בנו לי תכנית</button>
+        </div>
+      </div>
+
+      <!-- Initial amount -->
+      <div class="card p-5 mb-4">
+        <div class="text-sm font-medium text-slate-500 text-center mb-2">סכום השקעה ראשוני</div>
+        <div class="flex items-center justify-center gap-1 mb-3">
+          <span class="disp text-2xl font-bold" id="sav-initial-display">10,000</span>
+          <span class="text-lg text-slate-400">₪</span>
+          <button class="text-slate-300 hover:text-brandtext ms-1" onclick="startEdit('sav-initial')"><span class="material-symbols-outlined text-base">edit</span></button>
+        </div>
+        <div class="hidden items-center justify-center gap-1.5 mb-3" id="sav-initial-edit-wrap">
+          <input class="w-28 border border-line rounded-lg px-2 py-1 text-sm font-semibold text-center" id="sav-initial-edit-input" type="number">
+          <button class="text-growth" onclick="commitEdit('sav-initial')"><span class="material-symbols-outlined text-lg">check</span></button>
+          <button class="text-slate-400" onclick="cancelEdit('sav-initial')"><span class="material-symbols-outlined text-lg">close</span></button>
+        </div>
+        <input class="w-full" id="sav-initial-slider" max="1000" min="0" type="range" value="20">
+        <div class="flex justify-between mt-2 text-[11px] text-slate-400"><span>0 ₪</span><span>500,000 ₪</span></div>
+      </div>
+
+      <!-- Monthly amount -->
+      <div class="card p-5 mb-4">
+        <div class="text-sm font-medium text-slate-500 text-center mb-2">הפקדה חודשית</div>
+        <div class="flex items-center justify-center gap-1 mb-3">
+          <span class="disp text-2xl font-bold" id="sav-monthly-display">250</span>
+          <span class="text-lg text-slate-400">₪</span>
+          <button class="text-slate-300 hover:text-brandtext ms-1" onclick="startEdit('sav-monthly')"><span class="material-symbols-outlined text-base">edit</span></button>
+        </div>
+        <div class="hidden items-center justify-center gap-1.5 mb-3" id="sav-monthly-edit-wrap">
+          <input class="w-28 border border-line rounded-lg px-2 py-1 text-sm font-semibold text-center" id="sav-monthly-edit-input" type="number">
+          <button class="text-growth" onclick="commitEdit('sav-monthly')"><span class="material-symbols-outlined text-lg">check</span></button>
+          <button class="text-slate-400" onclick="cancelEdit('sav-monthly')"><span class="material-symbols-outlined text-lg">close</span></button>
+        </div>
+        <input class="w-full" id="sav-monthly-slider" max="1000" min="0" type="range" value="25">
+        <div class="flex justify-between mt-2 text-[11px] text-slate-400"><span>0 ₪</span><span>10,000 ₪</span></div>
+      </div>
+
+      <!-- Years -->
+      <div class="card p-5 mb-4">
+        <div class="text-sm font-medium text-slate-500 text-center mb-2">תקופת החיסכון</div>
+        <div class="flex items-center justify-center gap-1 mb-3">
+          <span class="disp text-2xl font-bold" id="sav-years-display">10</span>
+          <span class="text-lg text-slate-400">שנים</span>
+        </div>
+        <input class="w-full" id="sav-years-slider" max="30" min="1" type="range" value="10">
+        <div class="flex justify-between mt-2 text-[11px] text-slate-400"><span>שנה 1</span><span>30 שנים</span></div>
+      </div>
+
+      <!-- Route selector -->
+      <!-- mobile: single-card carousel with arrows -->
+      <div class="mobile-only-routes mb-6">
+        <div class="flex items-center gap-2 mb-2">
+          <button class="w-8 h-8 rounded-full border border-line flex items-center justify-center flex-shrink-0 hover:bg-slate-50" onclick="carouselMove('savings',-1)"><span class="material-symbols-outlined text-lg">chevron_right</span></button>
+          <div class="flex-1 min-w-0" id="savings-carousel"></div>
+          <button class="w-8 h-8 rounded-full border border-line flex items-center justify-center flex-shrink-0 hover:bg-slate-50" onclick="carouselMove('savings',1)"><span class="material-symbols-outlined text-lg">chevron_left</span></button>
+        </div>
+        <div class="flex justify-center gap-1.5" id="savings-carousel-dots"></div>
+      </div>
+
+      <!-- desktop: hero + muted strip -->
+      <div class="desktop-only-routes">
+        <div class="flex gap-2 overflow-x-auto pb-1 mb-6" id="savings-route-row"></div>
+      </div>
+
+      <!-- Results -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4" id="savings-results-grid">
+        <div class="card p-4 text-center">
+          <div class="text-xs text-slate-500 mb-1">סך ההפקדות</div>
+          <div class="disp text-lg sm:text-xl font-bold break-words" id="sav-total-deposits" dir="ltr">₪0</div>
+        </div>
+        <div class="card p-4 text-center">
+          <div class="text-xs text-slate-500 mb-1">סך הרווח הצפוי</div>
+          <div class="disp text-lg sm:text-xl font-bold text-growth break-words" id="sav-total-profit" dir="ltr">₪0</div>
+        </div>
+        <div class="card p-4 text-center bg-brand/10 border-brand/40">
+          <div class="text-xs text-slate-500 mb-1">הסכום הצפוי בסוף התקופה</div>
+          <div class="disp text-lg sm:text-xl font-bold break-words" id="sav-final-amount" dir="ltr">₪0</div>
+        </div>
+      </div>
+
+      <button class="w-full flex items-center justify-between gap-2 py-3 px-1 mb-4 text-brandtext text-sm font-semibold" onclick="goto('savings-analysis')">
+        <span>ניתוח השקעה — גרף התקדמות ופירוט שנתי</span>
+        <span class="material-symbols-outlined text-base">arrow_back</span>
+      </button>
+
+      <button class="btn-brand w-full py-3.5 rounded-xl font-semibold" id="savings-cta">קח אותי ליעד</button>
+    </section>
+
+    <!-- ============ SAVINGS ANALYSIS (chart + yearly table) ============ -->
+    <section class="screen" id="screen-savings-analysis">
+      <button class="text-sm font-semibold text-brandtext mb-4" onclick="goto('savings')">→ חזרה לחיסכון לכל מטרה</button>
+
+      <!-- Chart -->
+      <div class="card p-5 mb-4">
+        <div class="font-semibold text-sm mb-3">התקדמות החיסכון לאורך השנים</div>
+        <div id="sav-chart"></div>
+      </div>
+
+      <!-- Yearly table -->
+      <div class="card p-5 mb-4 overflow-x-auto">
+        <div class="font-semibold text-sm mb-3">פירוט שנתי</div>
+        <table class="w-full text-sm min-w-[400px]">
+          <thead>
+            <tr class="text-slate-400 text-xs border-b border-line">
+              <th class="text-right py-2 font-medium">שנה</th>
+              <th class="text-right py-2 font-medium">הפקדות בשנה</th>
+              <th class="text-right py-2 font-medium">רווח בשנה</th>
+              <th class="text-right py-2 font-medium">סה"כ בתיק</th>
+            </tr>
+          </thead>
+          <tbody id="sav-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============ DEPOSIT ============ -->
+    <section class="screen" id="screen-deposit">
+      <button class="flex items-center gap-1 text-sm font-semibold text-slate-500 hover:text-brandtext mb-4" onclick="backFromDeposit()">
+        <span class="material-symbols-outlined text-base">arrow_forward</span>
+        <span id="deposit-back-label">חזרה לתכנון ההשקעה</span>
+      </button>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4" id="deposit-methods"><!-- injected --></div>
+      <div class="card p-5 mb-4" id="deposit-account-form">
+        <div class="text-sm font-semibold mb-3">מאיזה חשבון מבוצעת ההפקדה?</div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select class="border border-line rounded-lg p-2.5 text-sm"><option>לאומי</option><option>הפועלים</option><option>דיסקונט</option></select>
+          <input class="border border-line rounded-lg p-2.5 text-sm" placeholder="סניף">
+          <input class="border border-line rounded-lg p-2.5 text-sm" placeholder="מספר חשבון">
+        </div>
+      </div>
+      <div class="card p-5 mb-4" id="deposit-detail"><!-- injected --></div>
+      <div class="card p-6">
+        <div class="hidden items-center gap-2 mb-4" id="deposit-step1-label">
+          <span class="w-6 h-6 rounded-full bg-brand text-ink flex items-center justify-center text-xs font-bold flex-shrink-0">1</span>
+          <div class="font-bold text-sm">הפקדה חד-פעמית — הסכום הראשוני</div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 text-center mb-5">
+          <div><div class="text-xs text-slate-400 mb-1">סכום</div><div class="disp text-xl font-bold" id="dep-amount">100,000 ₪</div></div>
+          <div><div class="text-xs text-slate-400 mb-1">מסלול</div><div class="disp text-xl font-bold text-brandtext" id="dep-route">B-MATCH</div></div>
+          <div><div class="text-xs text-slate-400 mb-1">ריבית</div><div class="disp text-xl font-bold text-brandtext" id="dep-rate">8.31%</div></div>
+        </div>
+        <div id="summary-btn-container"></div>
+      </div>
+
+      <div class="card p-6 mt-4 hidden" id="savings-recurring-card">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-6 h-6 rounded-full bg-brand text-ink flex items-center justify-center text-xs font-bold flex-shrink-0">2</span>
+          <div class="font-bold text-sm">הקמת הוראת קבע חודשית בחשבון הבנק</div>
+        </div>
+        <p class="text-sm text-slate-600 leading-relaxed mb-5">כדי להשלים את תכנית החיסכון, יש להקים בנוסף בבנק שלכם <b>הוראת קבע חודשית</b> בסך <span class="font-bold" id="sav-recurring-amount-inline">₪0</span>, שתופקד לראשונה <b>בתחילת החודש הבא</b>. זו פעולה נפרדת מההפקדה החד-פעמית שלמעלה. בלחיצה על הכפתור נעביר אותך ליצירת הוראת קבע בקליק, מזכירים לך שבאפשרותך לבטל/לעדכן את הוראת הקבע בחשבון הבנק שלך בכל רגע נתון, ללא שום התחייבות כלפינו!</p>
+        <div class="grid grid-cols-3 gap-4 text-center mb-5">
+          <div><div class="text-xs text-slate-400 mb-1">סכום</div><div class="disp text-xl font-bold" id="sav-recurring-amount">₪0</div></div>
+          <div><div class="text-xs text-slate-400 mb-1">מסלול</div><div class="disp text-xl font-bold text-brandtext" id="sav-recurring-route">B-MATCH</div></div>
+          <div><div class="text-xs text-slate-400 mb-1">ריבית</div><div class="disp text-xl font-bold text-brandtext" id="sav-recurring-rate">8.31%</div></div>
+        </div>
+        <button class="btn-brand w-full py-3.5 rounded-xl font-semibold" onclick="showToast('מעבר מאובטח להקמת הוראת קבע בבנק...')">מעבר להקמת הוראת קבע באתר הבנק</button>
+      </div>
+    </section>
+
+    <!-- ============ MY DEPOSITS ============ -->
+    <section class="screen" id="screen-deposits">
+      <div class="card divide-y divide-line" id="deposits-list"><!-- injected --></div>
+    </section>
+
+    <!-- ============ ONBOARDING / KYC ============ -->
+    <section class="screen" id="screen-onboarding">
+      <div class="flex items-center gap-2 mb-6" id="onboard-steps"><!-- injected --></div>
+
+      <div id="onboard-step-1">
+        <div class="card p-5 mb-4">
+          <div class="text-sm font-semibold mb-3">כיצד תרצו לאמת את זהותכם?</div>
+          <div class="grid grid-cols-2 gap-3">
+            <div class="border-2 rounded-xl p-4 text-center cursor-pointer" data-id-method="upload" onclick="selectIdMethod('upload')">
+              <span class="material-symbols-outlined text-2xl mb-1">badge</span>
+              <div class="text-sm font-semibold">העלאת תעודה</div>
+            </div>
+            <div class="border-2 rounded-xl p-4 text-center cursor-pointer" data-id-method="autentix" onclick="selectIdMethod('autentix')">
+              <span class="material-symbols-outlined text-2xl mb-1">verified_user</span>
+              <div class="text-sm font-semibold">אימות עם Autentix</div>
+            </div>
+          </div>
+        </div>
+        <div class="card p-5 mb-4" id="id-upload-box">
+          <div class="flex bg-slate-50 border border-line rounded-lg p-0.5 w-fit mx-auto mb-4" id="id-format-toggle">
+            <button class="px-4 py-1.5 text-xs font-semibold rounded-md bg-brand text-ink" data-format="biometric" onclick="selectIdFormat('biometric')">תעודה ביומטרית (חדשה)</button>
+            <button class="px-4 py-1.5 text-xs font-semibold rounded-md text-slate-500" data-format="old" onclick="selectIdFormat('old')">פורמט ישן</button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3" id="id-format-biometric">
+            <label class="border-2 border-dashed border-line rounded-xl p-4 flex flex-col items-center text-center cursor-pointer block">
+              <input class="hidden" onchange="handleDocUpload(this,'idFront')" type="file">
+              <span class="material-symbols-outlined text-2xl text-slate-300" id="idFront-icon">upload_file</span>
+              <span class="text-xs font-semibold mt-1">צילום קדמי</span>
+              <span class="text-[10px] text-slate-400" id="idFront-status-text">לחצו להעלאה</span>
+            </label>
+            <label class="border-2 border-dashed border-line rounded-xl p-4 flex flex-col items-center text-center cursor-pointer block">
+              <input class="hidden" onchange="handleDocUpload(this,'idBack')" type="file">
+              <span class="material-symbols-outlined text-2xl text-slate-300" id="idBack-icon">upload_file</span>
+              <span class="text-xs font-semibold mt-1">צילום גב</span>
+              <span class="text-[10px] text-slate-400" id="idBack-status-text">לחצו להעלאה</span>
+            </label>
+          </div>
+
+          <div class="hidden" id="id-format-old">
+            <label class="border-2 border-dashed border-line rounded-xl p-6 flex flex-col items-center text-center cursor-pointer block">
+              <input class="hidden" onchange="handleDocUpload(this,'idOld')" type="file">
+              <span class="material-symbols-outlined text-3xl text-slate-300" id="idOld-icon">upload_file</span>
+              <span class="text-sm font-semibold mt-2">צילום עמוד תעודת הזהות</span>
+              <span class="text-xs text-slate-400" id="idOld-status-text">לחצו להעלאה</span>
+            </label>
+          </div>
+        </div>
+        <div class="hidden card p-6 mb-4 text-center" id="autentix-box">
+          <span class="material-symbols-outlined text-3xl text-brandtext">face</span>
+          <div class="text-sm font-semibold mt-2 mb-3">אימות פנים מהיר, ללא מסמכים</div>
+          <button class="btn-brand px-6 py-2 rounded-lg text-sm font-semibold" id="autentix-btn" onclick="startAutentix()">התחל אימות</button>
+        </div>
+        <button class="btn-brand w-full py-3 rounded-xl font-semibold" onclick="tryGoStep2()">המשך</button>
+      </div>
+
+      <div class="hidden" id="onboard-step-2">
+        <div class="card p-5 mb-4">
+          <label class="border-2 border-dashed border-line rounded-xl p-6 flex flex-col items-center text-center cursor-pointer block">
+            <input class="hidden" id="bank-file-input" onchange="handleDocUpload(this,'bank')" type="file">
+            <span class="material-symbols-outlined text-3xl text-slate-300" id="bank-icon">account_balance</span>
+            <span class="text-sm font-semibold mt-2">אישור ניהול חשבון בנק</span>
+            <span class="text-xs text-slate-400" id="bank-status-text">לחצו להעלאה</span>
+          </label>
+        </div>
+        <div class="flex gap-2">
+          <button class="border border-line px-5 py-3 rounded-xl font-semibold text-sm" onclick="goOnboardStep(1)">חזרה</button>
+          <button class="btn-brand flex-1 py-3 rounded-xl font-semibold" onclick="tryGoStep3()">המשך</button>
+        </div>
+      </div>
+
+      <div class="hidden" id="onboard-step-3">
+        <p class="text-xs text-slate-400 mb-3">כל טופס נפתח למילוי וחתימה דיגיטלית במערכת מסמכים מאובטחת</p>
+        <div class="space-y-3 mb-4">
+
+          <!-- FATCA -->
+          <div class="card overflow-hidden">
+            <button class="w-full flex items-center justify-between p-4 text-right" onclick="openDigitalDoc('fatca')" id="fatca-doc-btn">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-brandtext">description</span>
+                <div>
+                  <div class="text-sm font-semibold">טופס FATCA</div>
+                  <div class="text-xs text-slate-400">הצהרת תושבות לצורכי מס</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-400" id="fatca-doc-badge">לא מולא</span>
+            </button>
+          </div>
+
+          <!-- KYC -->
+          <div class="card overflow-hidden">
+            <button class="w-full flex items-center justify-between p-4 text-right" onclick="openDigitalDoc('kyc')" id="kyc-doc-btn">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-brandtext">badge</span>
+                <div>
+                  <div class="text-sm font-semibold">טופס הכר את הלקוח (KYC)</div>
+                  <div class="text-xs text-slate-400">איש ציבור ומקור כספים</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-400" id="kyc-doc-badge">לא מולא</span>
+            </button>
+          </div>
+
+          <!-- Service declaration -->
+          <div class="card overflow-hidden">
+            <button class="w-full flex items-center justify-between p-4 text-right" onclick="openDigitalDoc('service')" id="service-doc-btn">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-brandtext">fact_check</span>
+                <div>
+                  <div class="text-sm font-semibold">טופס הצהרת מקבל שירות</div>
+                  <div class="text-xs text-slate-400">הצהרה קצרה</div>
+                </div>
+              </div>
+              <span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-400" id="service-doc-badge">לא מולא</span>
+            </button>
+          </div>
+
+        </div>
+        <div class="flex gap-2">
+          <button class="border border-line px-5 py-3 rounded-xl font-semibold text-sm" onclick="goOnboardStep(2)">חזרה</button>
+          <button class="btn-brand flex-1 py-3 rounded-xl font-semibold" onclick="submitOnboarding()">סיימתי</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="screen" id="screen-faq">
+      <div class="card divide-y divide-line" id="faq-list"><!-- injected --></div>
+    </section>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- NAV ---------- */
+const titles = { dashboard:'דשבורד', invest:'כמה תרצו להשקיע?', income:'כמה תרצו להכניס כל חודש?', savings:'לאיזו מטרה תרצו לחסוך?', 'savings-analysis':'ניתוח השקעה', deposit:'הפקדה', deposits:'ההפקדות שלי', onboarding:'אימות והכרות', faq:'מרכז המידע' };
+function switchScreen(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.screen===screen));
+  document.getElementById('page-title').textContent = titles[screen];
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function goto(screen){
+  switchScreen(screen);
+}
+document.querySelectorAll('[data-screen]').forEach(el=>el.addEventListener('click',()=>goto(el.dataset.screen)));
+document.querySelectorAll('[data-goto]').forEach(el=>el.addEventListener('click',()=>goto(el.dataset.goto)));
+
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
+
+function toggleManager(){ document.getElementById('manager-popover').classList.toggle('hidden'); }
+function openMobileDrawer(){ document.getElementById('mobile-drawer-backdrop').classList.remove('hidden'); document.getElementById('mobile-drawer').classList.add('open'); }
+function closeMobileDrawer(){ document.getElementById('mobile-drawer-backdrop').classList.add('hidden'); document.getElementById('mobile-drawer').classList.remove('open'); }
+function toggleMobilePreview(){
+  const isMobile = document.documentElement.classList.toggle('force-mobile');
+  document.getElementById('view-toggle-icon').textContent = isMobile ? 'desktop_windows' : 'smartphone';
+  document.getElementById('view-toggle-label').textContent = isMobile ? 'תצוגת דסקטופ' : 'תצוגת מובייל';
+}
+document.addEventListener('click',(e)=>{
+  const pop=document.getElementById('manager-popover'), btn=document.getElementById('manager-btn'), btnMobile=document.getElementById('manager-btn-mobile');
+  if(!pop.classList.contains('hidden') && !pop.contains(e.target) && !btn.contains(e.target) && !btnMobile.contains(e.target)) pop.classList.add('hidden');
+});
+
+/* ---------- SHARED DATA ---------- */
+const routes = {
+  neo:{ name:'NEO', rate:0.0395, mgmt:0, fund:0, tag:'נזילות מיידית', color:'#64748B', textColor:'#64748B', desc:'מסלול המאפשר שימוש מהיר בכספים' },
+  bmatch:{ name:'B-MATCH', rate:0.0831, mgmt:0.007, fund:0.01, tag:'נזילות מהירה', color:'#FCA5A5', textColor:'#C2447A', desc:'מסלול עם פיזור מקסימלי ללא תקופת מינימום' },
+  bgold:{ name:'B-GOLD', rate:0.0819, mgmt:0.008, fund:0.01, tag:'נזיל כל 18 חודשים', color:'#B8792E', textColor:'#B8792E', desc:'כל ההלוואות מגובות בשעבודים' },
+  iron:{ name:'B-STATE', rate:0.0475, mgmt:0, fund:0, tag:'נזיל כל 12 חודשים', color:'#1F7A5C', textColor:'#1F7A5C', desc:'כל ההלוואות בערבות המדינה' }
+};
+let currentRoute='bmatch', currentAmount=100000, currentStage=1, years=3;
+let currentIncomeRoute='bmatch', currentMonthlyIncome=3000;
+
+/* ---------- ROUTE CAROUSEL (single card + arrows, used on dashboard/invest/income) ---------- */
+const routeKeys = Object.keys(routes);
+function getContextRoutes(context){
+  // Passive Income (monthly withdrawal) only supports routes that offer a monthly withdrawal option.
+  // B-GOLD and B-STATE have no such option, so they are excluded there.
+  return context==='income' ? ['neo','bmatch'] : routeKeys;
+}
+let dashboardCarouselIndex = routeKeys.indexOf('bmatch');
+
+let cardExpanded = { invest:false, income:false, savings:false };
+function toggleCardExpand(context){
+  cardExpanded[context] = !cardExpanded[context];
+  renderCarousel(context);
+  if(context==='invest') renderRouteRow();
+  else if(context==='income') renderIncomeRouteRow();
+  else if(context==='savings') renderSavingsRouteRow();
+}
+function renderRouteCard(key, context){
+  const r = routes[key];
+  const isBmatch = key==='bmatch';
+  let stat, caption;
+  stat = `${(r.rate*100).toFixed(2)}%`;
+  caption = key==='iron' ? 'ריבית שנתית | P-0.25%' : 'ריבית שנתית ממוצעת';
+  const feeText = (r.mgmt+r.fund)>0 ? `דמי ניהול ${(r.mgmt*100).toFixed(1)}%${isBmatch?' (לא כולל ערבות מדינה)':''}` : 'ללא הוצאות נוספות מלבד מס';
+  const isExpandable = context==='invest' || context==='income' || context==='savings';
+  const isExpanded = isExpandable && cardExpanded[context];
+  const showFullInfo = context==='dashboard' || isExpanded;
+  const extra = context==='dashboard'
+    ? `<div class="flex items-center justify-center gap-1 text-[11px] text-slate-400 mt-1">${feeText}<span class="material-symbols-outlined text-xs">info</span></div>
+      <button class="w-full py-2 rounded-lg text-sm font-semibold mt-3" style="background:${r.textColor}1A; color:${r.textColor};" onclick="selectRouteFromCarousel('${key}')">לבחירת מסלול זה</button>`
+    : (isExpanded ? `<div class="flex items-center justify-center gap-1 text-[11px] text-slate-400 mt-2 pt-2 border-t border-line">${feeText}<span class="material-symbols-outlined text-xs">info</span></div>` : '');
+  return `<div class="relative card p-4 text-center" style="border-top:4px solid ${r.color};">
+    ${isBmatch ? `<div class="absolute -top-2 right-1/2 translate-x-1/2 bg-brand text-ink text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">מומלץ</div>` : ''}
+    ${isExpandable ? `<div class="mobile-only-routes absolute top-2 left-2">
+      <button class="w-6 h-6 rounded-full border border-line flex items-center justify-center text-slate-400 hover:text-brandtext hover:border-brandtext bg-white" onclick="toggleCardExpand('${context}')" title="עוד מידע על המסלול">
+        <span class="material-symbols-outlined text-sm">${isExpanded?'expand_less':'info'}</span>
+      </button>
+    </div>` : ''}
+    <div class="text-[11px] text-slate-400 mb-1 mt-1">מסלול</div>
+    <div class="disp text-lg font-bold mb-1">${r.name}</div>
+    <div class="text-[11px] text-slate-400 mb-2">${r.tag}</div>
+    ${showFullInfo ? `<p class="text-xs text-slate-500 leading-relaxed mb-3 min-h-[36px]">${r.desc}</p>` : ''}
+    <div class="${context==='dashboard' ? 'border-t border-line pt-3' : ''}">
+      <div class="disp text-2xl font-bold" style="color:${r.textColor}" dir="ltr">${stat}</div>
+      <div class="text-[11px] text-slate-400 mt-1">${caption}</div>
+      ${extra}
+    </div>
+  </div>`;
+}
+let currentSavingsRoute='bmatch';
+function renderCarousel(context){
+  const key = context==='dashboard' ? routeKeys[dashboardCarouselIndex] : (context==='income' ? currentIncomeRoute : (context==='savings' ? currentSavingsRoute : currentRoute));
+  document.getElementById(context+'-carousel').innerHTML = renderRouteCard(key, context);
+  const ctxRoutes = getContextRoutes(context);
+  document.getElementById(context+'-carousel-dots').innerHTML = ctxRoutes.map(k=>
+    `<span class="w-1.5 h-1.5 rounded-full ${k===key?'bg-ink':'bg-slate-200'}"></span>`).join('');
+  if(context==='income') renderIncomeSummary();
+  if(context==='savings') updateSavingsCalc();
+}
+function carouselMove(context, dir){
+  const ctxRoutes = getContextRoutes(context);
+  const currentKey = context==='dashboard' ? routeKeys[dashboardCarouselIndex] : (context==='income' ? currentIncomeRoute : (context==='savings' ? currentSavingsRoute : currentRoute));
+  const newIdx = (ctxRoutes.indexOf(currentKey) + dir + ctxRoutes.length) % ctxRoutes.length;
+  const newKey = ctxRoutes[newIdx];
+  if(context==='dashboard'){ dashboardCarouselIndex = routeKeys.indexOf(newKey); }
+  else if(context==='invest'){ currentRoute = newKey; updateInvest(); }
+  else if(context==='savings'){ currentSavingsRoute = newKey; renderSavingsRouteRow(); }
+  else { currentIncomeRoute = newKey; }
+  renderCarousel(context);
+}
+function selectRouteFromCarousel(key){ currentRoute=key; goto('invest'); updateInvest(); renderRouteRow(); renderCarousel('invest'); }
+function toggleRoutesTeaser(){
+  const section = document.getElementById('routes-expanded-section');
+  const isHidden = section.classList.contains('hidden');
+  section.classList.toggle('hidden');
+  document.getElementById('routes-teaser-label').textContent = isHidden ? 'הסתר' : 'גלו עוד';
+  document.getElementById('routes-teaser-icon').textContent = isHidden ? 'expand_less' : 'arrow_back';
+}
+
+/* ---------- DESKTOP-ONLY route displays (unchanged from before the mobile carousel work) ---------- */
+function renderRoutesExplainerCards(containerId, context){
+  document.getElementById(containerId).innerHTML = Object.keys(routes).map(key=>{
+    const r=routes[key];
+    const isBmatch = key==='bmatch';
+    const feeText = (r.mgmt+r.fund)>0 ? `דמי ניהול ${(r.mgmt*100).toFixed(1)}%${isBmatch?' (לא כולל ערבות מדינה)':''}` : 'ללא הוצאות נוספות מלבד מס';
+    const rateLabel = key==='iron' ? 'ריבית שנתית | P-0.25%' : 'ריבית שנתית ממוצעת';
+    return `<div class="relative card flex-shrink-0 w-56 p-4 text-center" style="scroll-snap-align:start; border-top:4px solid ${r.color};">
+      ${isBmatch ? `<div class="absolute -top-2 right-1/2 translate-x-1/2 bg-brand text-ink text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">מומלץ</div>` : ''}
+      <div class="text-[11px] text-slate-400 mb-1 mt-1">מסלול</div>
+      <div class="disp text-lg font-bold mb-2">${r.name}</div>
+      <p class="text-xs text-slate-500 leading-relaxed mb-3 min-h-[48px]">${r.desc}</p>
+      <div class="border-t border-line pt-3 mb-1">
+        <div class="disp text-2xl font-bold">${(r.rate*100).toFixed(2)}%</div>
+        <div class="text-[11px] text-slate-400 mt-1">${rateLabel}</div>
+        <div class="flex items-center justify-center gap-1 text-[11px] text-slate-400 mt-0.5">${feeText}<span class="material-symbols-outlined text-xs">info</span></div>
+      </div>
+      <button class="w-full py-2 rounded-lg text-sm font-semibold mt-3" style="background:${r.textColor}1A; color:${r.textColor};" onclick="selectRouteFromCarousel('${key}')">לבחירת מסלול זה</button>
+    </div>`;
+  }).join('');
+}
+
+function renderRouteFocusRow(containerId, selectedKey, onSelect, statFn, captionFn, context){
+  document.getElementById(containerId).innerHTML = getContextRoutes(context).map(key=>{
+    const r = routes[key];
+    const isSelected = key===selectedKey;
+    const isBmatch = key==='bmatch';
+    const stat = statFn(key);
+    const badge = isBmatch ? `<div class="absolute -top-2 right-3 bg-brand text-ink text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">מומלץ</div>` : '';
+    if(isSelected){
+      const isExpanded = cardExpanded[context];
+      const feeText = (r.mgmt+r.fund)>0 ? `דמי ניהול ${(r.mgmt*100).toFixed(1)}%${isBmatch?' (לא כולל ערבות מדינה)':''}` : 'ללא הוצאות נוספות מלבד מס';
+      return `<div class="relative flex-[2.2] min-w-[190px] p-4 rounded-xl border-2 text-right transition-all cursor-pointer" style="border-color:${r.color}" onclick="${onSelect}('${key}')">
+        ${badge}
+        <button class="absolute top-2 left-2 w-6 h-6 rounded-full border border-line flex items-center justify-center text-slate-400 hover:text-brandtext hover:border-brandtext" onclick="event.stopPropagation(); toggleCardExpand('${context}')" title="עוד מידע על המסלול">
+          <span class="material-symbols-outlined text-sm">${isExpanded?'expand_less':'info'}</span>
+        </button>
+        <div class="flex items-center gap-2 mb-1 pe-7"><span class="w-2.5 h-2.5 rounded-full" style="background:${r.color}"></span><span class="disp font-bold">${r.name}</span><span class="text-[10px] text-slate-400">${r.tag}</span></div>
+        <div class="disp text-2xl font-bold" style="color:${r.textColor}" dir="ltr">${stat}</div>
+        <div class="text-[10px] text-slate-400 mt-0.5">${captionFn(key)}</div>
+        ${isExpanded ? `<p class="text-xs text-slate-500 leading-relaxed mt-2 pt-2 border-t border-line">${r.desc}</p>
+          <div class="flex items-center gap-1 text-[10px] text-slate-400 mt-1">${feeText}<span class="material-symbols-outlined text-xs">info</span></div>` : ''}
+      </div>`;
+    }
+    return `<button class="relative flex-1 min-w-[64px] p-3 rounded-xl border ${isBmatch?'border-brand':'border-line'} text-center opacity-50 hover:opacity-90 transition-opacity" onclick="${onSelect}('${key}')">
+      ${badge}
+      <div class="flex items-center justify-center gap-1 mb-1"><span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:${r.color}"></span><span class="text-xs font-semibold truncate">${r.name}</span></div>
+      <div class="disp text-xs font-bold text-slate-500" dir="ltr">${stat}</div>
+    </button>`;
+  }).join('');
+}
+function renderRouteRow(){
+  renderRouteFocusRow('route-row', currentRoute, 'selectRoute',
+    key => `${(routes[key].rate*100).toFixed(2)}%`,
+    key => key==='iron' ? 'ריבית שנתית | P-0.25%' : 'ריבית שנתית ממוצעת', 'invest');
+}
+function renderIncomeRouteRow(){
+  renderRouteFocusRow('income-route-row', currentIncomeRoute, 'selectIncomeRoute',
+    key => `${(routes[key].rate*100).toFixed(2)}%`,
+    key => key==='iron' ? 'ריבית שנתית | P-0.25%' : 'ריבית שנתית ממוצעת', 'income');
+}
+function renderSavingsRouteRow(){
+  renderRouteFocusRow('savings-route-row', currentSavingsRoute, 'selectSavingsRoute',
+    key => `${(routes[key].rate*100).toFixed(2)}%`,
+    key => key==='iron' ? 'ריבית שנתית | P-0.25%' : 'ריבית שנתית ממוצעת', 'savings');
+}
+function selectSavingsRoute(key){ currentSavingsRoute=key; renderSavingsRouteRow(); renderCarousel('savings'); }
+
+/* ---------- INVESTMENT PLANNING ---------- */
+const slider = document.getElementById('investment-slider');
+function mapAmount(v){
+  v=parseInt(v); const ratio=v/1000;
+  if(currentStage===1){ let val=100+(1000000-100)*ratio;
+    if(val<1000) return Math.round(val/10)*10;
+    if(val<10000) return Math.round(val/100)*100;
+    if(val<100000) return Math.round(val/1000)*1000;
+    return Math.round(val/5000)*5000;
+  } else { let val=1000000+9000000*ratio; return Math.round(val/100000)*100000; }
+}
+function selectRoute(key){ currentRoute=key; updateInvest(); renderRouteRow(); renderCarousel('invest'); }
+function revealStep2(){
+  document.getElementById('step2-container').classList.remove('hidden');
+  document.getElementById('amount-continue-btn').classList.add('hidden');
+  updateInvest();
+  renderRouteRow();
+  renderCarousel('invest');
+}
+function toggleExpenses(){
+  const detail=document.getElementById('expenses-detail');
+  const chevron=document.getElementById('expenses-chevron');
+  const isHidden=detail.classList.contains('hidden');
+  detail.classList.toggle('hidden');
+  chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+}
+function updateSliderFill(){ const pct=(slider.value-slider.min)/(slider.max-slider.min)*100; slider.style.setProperty('--pct',pct+'%'); }
+function updateInvest(manual){
+  currentAmount = manual!==undefined ? manual : mapAmount(slider.value);
+  document.getElementById('amount-display').textContent = currentAmount.toLocaleString();
+  const r=routes[currentRoute];
+  const gross=Math.floor(currentAmount*r.rate*years);
+  const mgmt=Math.floor(currentAmount*r.mgmt*years);
+  const fund=Math.floor(currentAmount*r.fund*Math.min(years,2));
+  const expenses=mgmt+fund;
+  const net=gross-expenses;
+  const portfolioValue=currentAmount+gross;
+  const returnPct = currentAmount>0 ? (gross/currentAmount*100) : 0;
+  document.getElementById('profit-portfolio').textContent='₪'+portfolioValue.toLocaleString();
+  document.getElementById('profit-return-pct').textContent='+'+returnPct.toFixed(1)+'%';
+  document.getElementById('profit-expenses').textContent='-₪'+expenses.toLocaleString();
+  document.getElementById('profit-mgmt').textContent='-₪'+mgmt.toLocaleString();
+  document.getElementById('profit-fund').textContent='-₪'+fund.toLocaleString();
+  document.getElementById('profit-net').textContent='₪'+net.toLocaleString();
+}
+slider.addEventListener('input', ()=>{ updateSliderFill(); updateInvest(); });
+function toggleStage(){
+  currentStage = currentStage===1?2:1;
+  document.getElementById('range-start').textContent = currentStage===1?'100 ₪':'1,000,000 ₪';
+  document.getElementById('range-end').textContent = currentStage===1?'1,000,000 ₪':'10,000,000 ₪';
+  document.getElementById('stage-toggle').innerHTML = currentStage===1
+    ? '<span class="material-symbols-outlined text-xs">swap_vert</span> מעל מיליון ₪'
+    : '<span class="material-symbols-outlined text-xs">swap_vert</span> מתחת למיליון ₪';
+  updateInvest();
+}
+function renderDuration(){
+  document.getElementById('duration-selector').innerHTML=[1,2,3,4,5].map(y=>
+    `<button class="px-3 py-1 text-xs font-semibold rounded-md ${y===years?'bg-brand text-ink':'text-slate-500'}" onclick="setYears(${y})">${y}</button>`).join('');
+}
+function setYears(y){ years=y; renderDuration(); updateInvest(); }
+
+/* manual entry (shared for amount + income) */
+function startEdit(kind){
+  document.getElementById(kind+'-display').parentElement.classList.add('hidden');
+  const wrap=document.getElementById(kind+'-edit-wrap'); wrap.classList.remove('hidden'); wrap.classList.add('flex');
+  const input=document.getElementById(kind+'-edit-input');
+  const values = { amount:currentAmount, income:currentMonthlyIncome, 'sav-initial':savInitial, 'sav-monthly':savMonthly };
+  input.value = values[kind]; input.focus(); input.select();
+}
+function cancelEdit(kind){
+  document.getElementById(kind+'-edit-wrap').classList.add('hidden');
+  document.getElementById(kind+'-edit-wrap').classList.remove('flex');
+  document.getElementById(kind+'-display').parentElement.classList.remove('hidden');
+}
+function commitEdit(kind){
+  const val=parseInt(document.getElementById(kind+'-edit-input').value);
+  if(isNaN(val)||val<=0){ showToast('יש להזין סכום תקין'); return; }
+  if(kind==='amount'){
+    const clamped=Math.max(100,Math.min(val,10000000));
+    if(clamped>1000000 && currentStage===1) toggleStage(); else if(clamped<=1000000 && currentStage===2) toggleStage();
+    const raw = currentStage===1 ? ((clamped-100)/(1000000-100))*1000 : ((clamped-1000000)/(10000000-1000000))*1000;
+    slider.value=Math.min(1000,Math.max(0,Math.round(raw))); updateSliderFill();
+    updateInvest(clamped); renderRouteRow(); renderCarousel('invest');
+  } else if(kind==='sav-initial'){
+    const clamped=Math.max(0,Math.min(val,500000));
+    savInitialSlider.value=Math.min(1000,Math.max(0,Math.round(clamped/500))); updateSavSliderFill('sav-initial-slider');
+    savInitial=clamped; document.getElementById('sav-initial-display').textContent=savInitial.toLocaleString();
+    updateSavingsCalc();
+  } else if(kind==='sav-monthly'){
+    const clamped=Math.max(0,Math.min(val,10000));
+    savMonthlySlider.value=Math.min(1000,Math.max(0,Math.round(clamped/10))); updateSavSliderFill('sav-monthly-slider');
+    savMonthly=clamped; document.getElementById('sav-monthly-display').textContent=savMonthly.toLocaleString();
+    updateSavingsCalc();
+  } else {
+    const clamped=Math.max(100,Math.min(val,50000));
+    const raw=((clamped-100)/(50000-100))*1000;
+    incomeSlider.value=Math.min(1000,Math.max(0,Math.round(raw))); updateIncomeSliderFill();
+    updateIncome(clamped);
+  }
+  cancelEdit(kind);
+}
+
+document.getElementById('invest-cta').addEventListener('click', ()=>{
+  const r=routes[currentRoute];
+  document.getElementById('dep-amount').textContent=currentAmount.toLocaleString()+' ₪';
+  document.getElementById('dep-route').textContent=r.name;
+  document.getElementById('dep-rate').textContent=(r.rate*100).toFixed(2)+'%';
+  journeyState.deposit='in_progress'; journeyState.depositInfo={amount:currentAmount, route:r.name, rate:(r.rate*100).toFixed(2)};
+  renderJourney();
+  depositSourceScreen='invest';
+  document.getElementById('deposit-back-label').textContent='חזרה לתכנון ההשקעה';
+  document.getElementById('deposit-step1-label').classList.add('hidden');
+  document.getElementById('deposit-step1-label').classList.remove('flex');
+  document.getElementById('savings-recurring-card').classList.add('hidden');
+  applyMethodDefaults(currentAmount);
+  goto('deposit');
+});
+
+/* ---------- PASSIVE INCOME ---------- */
+const incomeSlider=document.getElementById('income-slider');
+function mapIncome(v){ v=parseInt(v); const ratio=v/1000; let val=100+(50000-100)*ratio;
+  if(val<1000) return Math.round(val/50)*50; if(val<10000) return Math.round(val/100)*100; return Math.round(val/500)*500;
+}
+function updateIncomeSliderFill(){ const pct=(incomeSlider.value-incomeSlider.min)/(incomeSlider.max-incomeSlider.min)*100; incomeSlider.style.setProperty('--pct',pct+'%'); }
+function computeRequiredAmount(routeKey){
+  const r=routes[routeKey];
+  // net annual rate accounts for both management fee and mutual-fund provision
+  const netAnnual = r.rate - r.mgmt - r.fund;
+  if(netAnnual<=0) return 0;
+  return Math.ceil((currentMonthlyIncome*12)/netAnnual);
+}
+function renderIncomeSummary(){
+  const r = routes[currentIncomeRoute];
+  document.getElementById('income-required-amount').textContent = '₪'+computeRequiredAmount(currentIncomeRoute).toLocaleString();
+  document.getElementById('income-required-caption').textContent = `במסלול ${r.name}`;
+}
+function saveIncomeState(){
+  try{
+    sessionStorage.setItem('btb_income_state', JSON.stringify({
+      revealed: !document.getElementById('income-step2-container').classList.contains('hidden'),
+      route: currentIncomeRoute,
+      income: currentMonthlyIncome,
+      sliderValue: incomeSlider.value
+    }));
+  } catch(e){}
+}
+function restoreIncomeState(){
+  try{
+    const raw = sessionStorage.getItem('btb_income_state');
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    currentIncomeRoute = s.route || currentIncomeRoute;
+    if(!getContextRoutes('income').includes(currentIncomeRoute)) currentIncomeRoute='bmatch';
+    currentMonthlyIncome = s.income || currentMonthlyIncome;
+    incomeSlider.value = s.sliderValue || incomeSlider.value;
+    updateIncomeSliderFill();
+    document.getElementById('income-display').textContent = currentMonthlyIncome.toLocaleString();
+    if(s.revealed) revealIncomeStep2();
+  } catch(e){}
+}
+function selectIncomeRoute(key){ currentIncomeRoute=key; renderIncomeRouteRow(); renderCarousel('income'); saveIncomeState(); }
+function revealIncomeStep2(){
+  document.getElementById('income-step2-container').classList.remove('hidden');
+  document.getElementById('income-continue-btn').classList.add('hidden');
+  renderIncomeRouteRow();
+  renderCarousel('income');
+  saveIncomeState();
+}
+function updateIncome(manual){
+  currentMonthlyIncome = manual!==undefined ? manual : mapIncome(incomeSlider.value);
+  document.getElementById('income-display').textContent = currentMonthlyIncome.toLocaleString();
+  if(!document.getElementById('income-step2-container').classList.contains('hidden')){
+    renderIncomeRouteRow();
+    renderCarousel('income');
+  }
+  saveIncomeState();
+}
+incomeSlider.addEventListener('input', ()=>{ updateIncomeSliderFill(); updateIncome(); });
+document.getElementById('income-cta').addEventListener('click', ()=>{
+  const r=routes[currentIncomeRoute];
+  const required=computeRequiredAmount(currentIncomeRoute);
+  document.getElementById('dep-amount').textContent=required.toLocaleString()+' ₪';
+  document.getElementById('dep-route').textContent=r.name;
+  document.getElementById('dep-rate').textContent=(r.rate*100).toFixed(2)+'%';
+  journeyState.deposit='in_progress'; journeyState.depositInfo={amount:required, route:r.name, rate:(r.rate*100).toFixed(2)};
+  renderJourney();
+  depositSourceScreen='income';
+  document.getElementById('deposit-back-label').textContent='חזרה להכנסה חודשית קבועה';
+  document.getElementById('deposit-step1-label').classList.add('hidden');
+  document.getElementById('deposit-step1-label').classList.remove('flex');
+  document.getElementById('savings-recurring-card').classList.add('hidden');
+  applyMethodDefaults(required);
+  goto('deposit');
+});
+
+document.getElementById('savings-cta').addEventListener('click', ()=>{
+  const r=routes[currentSavingsRoute];
+  document.getElementById('dep-amount').textContent=savInitial.toLocaleString()+' ₪';
+  document.getElementById('dep-route').textContent=r.name;
+  document.getElementById('dep-rate').textContent=(r.rate*100).toFixed(2)+'%';
+  journeyState.deposit='in_progress'; journeyState.depositInfo={amount:savInitial, route:r.name, rate:(r.rate*100).toFixed(2), monthly:savMonthly};
+  renderJourney();
+  depositSourceScreen='savings';
+  document.getElementById('deposit-back-label').textContent='חזרה לחיסכון לכל מטרה';
+  document.getElementById('deposit-step1-label').classList.remove('hidden');
+  document.getElementById('deposit-step1-label').classList.add('flex');
+  document.getElementById('savings-recurring-card').classList.remove('hidden');
+  document.getElementById('sav-recurring-amount-inline').textContent='₪'+savMonthly.toLocaleString();
+  document.getElementById('sav-recurring-amount').textContent='₪'+savMonthly.toLocaleString();
+  document.getElementById('sav-recurring-route').textContent=r.name;
+  document.getElementById('sav-recurring-rate').textContent=(r.rate*100).toFixed(2)+'%';
+  applyMethodDefaults(savInitial);
+  goto('deposit');
+});
+
+/* ---------- LONG-TERM SAVINGS CALCULATOR ---------- */
+let savInitial=10000, savMonthly=250, savYears=10;
+
+// Year-by-year simulation with monthly compounding. The mutual-fund provision is charged
+// only in years 1-2 of the OVERALL plan (same convention as Investment Planning), not per
+// individual monthly deposit — a deliberate simplification worth revisiting with Product.
+function simulateSavings(initialAmount, monthlyAmount, years, routeKey){
+  const r = routes[routeKey];
+  let balance = initialAmount;
+  let totalDeposits = initialAmount;
+  const yearly = [];
+  for(let y=1; y<=years; y++){
+    const fundApplies = y<=2;
+    const netAnnual = r.rate - r.mgmt - (fundApplies ? r.fund : 0);
+    const monthlyRate = netAnnual/12;
+    const startBalance = balance;
+    let depositsThisYear = 0;
+    for(let m=1; m<=12; m++){
+      balance = balance*(1+monthlyRate) + monthlyAmount;
+      depositsThisYear += monthlyAmount;
+    }
+    const profitThisYear = balance - startBalance - depositsThisYear;
+    totalDeposits += depositsThisYear;
+    yearly.push({ year:y, deposits:depositsThisYear, profit:profitThisYear, balance });
+  }
+  return { finalBalance:balance, totalDeposits, totalProfit: balance-totalDeposits, yearly };
+}
+
+function solveMonthlyForTarget(target, years, routeKey, initialAmount){
+  let lo=0, hi=200000;
+  for(let i=0;i<60;i++){
+    const mid=(lo+hi)/2;
+    const res = simulateSavings(initialAmount, mid, years, routeKey);
+    if(res.finalBalance < target) lo=mid; else hi=mid;
+  }
+  return Math.ceil(hi/10)*10;
+}
+
+function updateSavSliderFill(id){ const el=document.getElementById(id); const pct=(el.value-el.min)/(el.max-el.min)*100; el.style.setProperty('--pct',pct+'%'); }
+
+const savInitialSlider = document.getElementById('sav-initial-slider');
+const savMonthlySlider = document.getElementById('sav-monthly-slider');
+const savYearsSlider = document.getElementById('sav-years-slider');
+
+function updateSavInitial(){
+  savInitial = Math.round(savInitialSlider.value*500);
+  document.getElementById('sav-initial-display').textContent = savInitial.toLocaleString();
+  updateSavingsCalc();
+}
+function updateSavMonthly(){
+  savMonthly = Math.round(savMonthlySlider.value*10);
+  document.getElementById('sav-monthly-display').textContent = savMonthly.toLocaleString();
+  updateSavingsCalc();
+}
+function updateSavYears(){
+  savYears = parseInt(savYearsSlider.value);
+  document.getElementById('sav-years-display').textContent = savYears;
+  updateSavingsCalc();
+}
+savInitialSlider.addEventListener('input', ()=>{ updateSavSliderFill('sav-initial-slider'); updateSavInitial(); });
+savMonthlySlider.addEventListener('input', ()=>{ updateSavSliderFill('sav-monthly-slider'); updateSavMonthly(); });
+savYearsSlider.addEventListener('input', ()=>{ updateSavSliderFill('sav-years-slider'); updateSavYears(); });
+
+function updateSavingsCalc(){
+  const result = simulateSavings(savInitial, savMonthly, savYears, currentSavingsRoute);
+  document.getElementById('sav-total-deposits').textContent = '₪'+Math.round(result.totalDeposits).toLocaleString();
+  document.getElementById('sav-total-profit').textContent = '₪'+Math.round(result.totalProfit).toLocaleString();
+  document.getElementById('sav-final-amount').textContent = '₪'+Math.round(result.finalBalance).toLocaleString();
+  renderSavingsChart(result.yearly, savInitial);
+  renderSavingsTable(result.yearly);
+}
+
+function renderSavingsTable(yearly){
+  document.getElementById('sav-table-body').innerHTML = yearly.map(row=>`
+    <tr class="border-b border-line">
+      <td class="py-2 text-right">${row.year}</td>
+      <td class="py-2 text-right" dir="ltr">₪${Math.round(row.deposits).toLocaleString()}</td>
+      <td class="py-2 text-right text-growth" dir="ltr">₪${Math.round(row.profit).toLocaleString()}</td>
+      <td class="py-2 text-right font-semibold" dir="ltr">₪${Math.round(row.balance).toLocaleString()}</td>
+    </tr>`).join('');
+}
+
+function renderSavingsChart(yearly, initial){
+  const w=600, h=200, padL=8, padR=8, padT=10, padB=10;
+  let cumDep = initial;
+  const depSeries = [{year:0, value:initial}];
+  yearly.forEach(r=>{ cumDep += r.deposits; depSeries.push({year:r.year, value:cumDep}); });
+  const balSeries = [{year:0, value:initial}, ...yearly.map(r=>({year:r.year, value:r.balance}))];
+  const maxVal = Math.max(...balSeries.map(p=>p.value), ...depSeries.map(p=>p.value), 1);
+  const maxYear = Math.max(yearly.length, 1);
+  const x = yr => (w-padR) - (yr/maxYear)*(w-padL-padR);
+  const y = val => (h-padB) - (val/maxVal)*(h-padT-padB);
+  const path = series => series.map((p,i)=> (i===0?'M':'L')+x(p.year).toFixed(1)+','+y(p.value).toFixed(1)).join(' ');
+  const svg = `
+  <div class="text-[11px] text-slate-400 mb-1">שווי מקסימלי בגרף: ₪${Math.round(maxVal).toLocaleString()}</div>
+  <svg viewBox="0 0 ${w} ${h}" class="w-full block" style="max-height:200px" preserveAspectRatio="xMidYMid meet">
+    <line x1="${padL}" y1="${h-padB}" x2="${w-padR}" y2="${h-padB}" stroke="#E6E2D9" stroke-width="1"/>
+    <path d="${path(depSeries)}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4"/>
+    <path d="${path(balSeries)}" fill="none" stroke="#1F7A5C" stroke-width="2.5"/>
+  </svg>
+  <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+    <span>שנה 0</span>
+    <span>שנה ${maxYear}</span>
+  </div>
+  <div class="flex items-center justify-center gap-4 mt-2 text-[11px] text-slate-400">
+    <span class="flex items-center gap-1.5"><span class="w-3 h-[3px] rounded-full inline-block" style="background:#1F7A5C"></span>שווי התיק</span>
+    <span class="flex items-center gap-1.5"><span class="w-3 h-[2px] rounded-full inline-block" style="background:repeating-linear-gradient(to right, #94a3b8 0 4px, transparent 4px 7px)"></span>סך הפקדות</span>
+  </div>`;
+  document.getElementById('sav-chart').innerHTML = svg;
+}
+
+const savingsPresets = {
+  child_million: { years:18, target:1000000, route:'bmatch', label:'מיליון ₪ לכל ילד', toast:'נבנתה תכנית לחיסכון של מיליון ₪ ב-18 שנה — מסלול B-MATCH' },
+  bar_mitzvah:   { years:13, target:60000,   route:'bmatch', label:'בר/בת מצווה', toast:'נבנתה תכנית לחיסכון לבר/בת מצווה ב-13 שנה — מסלול B-MATCH' },
+  wedding:       { years:20, target:150000,  route:'bmatch', label:'חתונה', toast:'נבנתה תכנית לחיסכון לחתונה ב-20 שנה — מסלול B-MATCH' },
+  apartment:     { years:10, target:300000,  route:'bmatch', label:'דירה', toast:'נבנתה תכנית לחיסכון לדירה ב-10 שנים — מסלול B-MATCH' },
+  car:           { years:5,  target:150000,  route:'bmatch', label:'רכב', toast:'נבנתה תכנית לחיסכון לרכב ב-5 שנים — מסלול B-MATCH' },
+  vacation:      { years:2,  target:20000,   route:'bmatch', label:'חופשה', toast:'נבנתה תכנית לחיסכון לחופשה ב-2 שנים — מסלול B-MATCH' },
+};
+function toggleCustomGoalForm(){
+  const form = document.getElementById('custom-goal-form');
+  form.classList.toggle('hidden');
+}
+function applyCustomGoal(){
+  const target = parseInt(document.getElementById('custom-goal-target').value);
+  let years = parseInt(document.getElementById('custom-goal-years').value);
+  if(isNaN(target) || target<=0 || isNaN(years) || years<=0){
+    showToast('נא להזין סכום יעד ומספר שנים תקינים');
+    return;
+  }
+  years = Math.min(30, Math.max(1, years));
+  applySavingsPreset('custom', { years, target, route:'bmatch', toast:`נבנתה תכנית מותאמת אישית ל-₪${target.toLocaleString()} ב-${years} שנים — מסלול B-MATCH` });
+}
+function applySavingsPreset(name, customConfig){
+  const preset = customConfig || savingsPresets[name];
+  if(!preset) return;
+  savYears = preset.years;
+  currentSavingsRoute = preset.route;
+  const monthly = solveMonthlyForTarget(preset.target, preset.years, preset.route, savInitial);
+  savMonthly = monthly;
+
+  savYearsSlider.value = preset.years;
+  updateSavSliderFill('sav-years-slider');
+  document.getElementById('sav-years-display').textContent = preset.years;
+
+  const monthlySliderVal = Math.min(1000, Math.max(0, Math.round(monthly/10)));
+  savMonthlySlider.value = monthlySliderVal;
+  updateSavSliderFill('sav-monthly-slider');
+  document.getElementById('sav-monthly-display').textContent = monthly.toLocaleString();
+
+  renderCarousel('savings');
+  renderSavingsRouteRow();
+  updateSavingsCalc();
+  showToast(preset.toast);
+}
+
+/* ---------- DEPOSIT ---------- */
+let depositSourceScreen='invest';
+function backFromDeposit(){ switchScreen(depositSourceScreen); }
+const methods = {
+  transfer:{ label:'העברה בנקאית', icon:'account_balance' },
+  check:{ label:"צילום צ'ק", icon:'photo_camera' }
+};
+let currentMethod='transfer';
+let transferMode='auto'; // 'auto' (recommended) or 'manual'
+const METHOD_AMOUNT_THRESHOLD = 200000;
+function applyMethodDefaults(amount){
+  if(amount<=METHOD_AMOUNT_THRESHOLD){ currentMethod='transfer'; transferMode='auto'; }
+  else { currentMethod='check'; }
+  renderMethods();
+}
+function renderMethods(){
+  document.getElementById('deposit-methods').innerHTML = Object.keys(methods).map(key=>{
+    const m=methods[key], sel=key===currentMethod;
+    return `<div class="card p-4 text-center cursor-pointer ${sel?'ring-2 ring-brand':''}" onclick="selectMethod('${key}')">
+      <span class="material-symbols-outlined text-2xl ${sel?'text-brandtext':'text-slate-400'}">${m.icon}</span>
+      <div class="text-sm font-semibold mt-1">${m.label}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('deposit-account-form').classList.toggle('hidden', currentMethod==='check');
+  renderDepositDetail();
+}
+function selectTransferMode(mode){ transferMode=mode; renderDepositDetail(); }
+function getDepositAmountNumber(){
+  return parseInt(document.getElementById('dep-amount').textContent.replace(/[^\d]/g,''), 10) || 0;
+}
+function renderDepositDetail(){
+  const box = document.getElementById('deposit-detail');
+  const amount = getDepositAmountNumber();
+  const isAmountBelowThreshold = amount<=METHOD_AMOUNT_THRESHOLD;
+  if(currentMethod==='transfer'){
+    box.innerHTML = `
+      <div class="flex bg-slate-50 border border-line rounded-lg p-0.5 w-fit mx-auto mb-4 mt-5">
+        <button class="relative px-4 py-1.5 text-xs font-semibold rounded-md ${transferMode==='auto'?'bg-brand text-ink':'text-slate-500'}" onclick="selectTransferMode('auto')">
+          ${isAmountBelowThreshold ? `<div class="absolute -top-6 right-0 bg-growth text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">מומלץ לסכום שבחרת</div>` : ''}
+          העברה מיידית
+        </button>
+        <button class="px-4 py-1.5 text-xs font-semibold rounded-md ${transferMode==='manual'?'bg-brand text-ink':'text-slate-500'}" onclick="selectTransferMode('manual')">העברה ידנית</button>
+      </div>
+      ${transferMode==='auto' ? `
+        <p class="text-sm text-slate-600 leading-relaxed text-center">מעבר מאובטח לאתר הבנק שלכם לביצוע ההפקדה - מאפשר שיוך מהיר של הכספים לחשבונך.</p>
+      ` : `
+        <p class="text-sm text-slate-600 leading-relaxed mb-4">העברה ידנית לחשבון הנאמנות שלנו:</p>
+        <div class="space-y-2">
+          ${[
+            {label:'סכום להעברה', value:document.getElementById('dep-amount').textContent},
+            {label:'מוטב', value:'בי טי בי נאמנויות בע"מ'},
+            {label:'בנק', value:'לאומי (10)'},
+            {label:'סניף', value:'811'},
+            {label:'חשבון', value:'52671849'}
+          ].map(f => `
+            <div class="flex items-center justify-between bg-slate-50 border border-line rounded-lg px-3 py-2">
+              <div class="text-sm"><span class="text-slate-400">${f.label}:</span> <span class="font-semibold text-ink" dir="ltr">${f.value}</span></div>
+              <button class="text-slate-400 hover:text-brandtext" onclick="copyText('${f.value.replace(/'/g,"\\'")}')"><span class="material-symbols-outlined text-lg">content_copy</span></button>
+            </div>`).join('')}
+        </div>
+        <div class="flex items-start gap-2 bg-amber/10 border border-amber/30 rounded-lg p-3 mt-4">
+          <span class="material-symbols-outlined text-amber text-lg flex-shrink-0">info</span>
+          <p class="text-xs text-amber leading-relaxed">לאחר ביצוע העברה נדרש לדווח על ביצוע ההפקדה. שיוך הכספים לוקח מספר ימי עסקים. אנו ממליצים לבצע העברה מיידית.</p>
+        </div>
+      `}`;
+  } else {
+    box.innerHTML = `
+      <p class="text-sm text-slate-600 leading-relaxed mb-4">סרקו את קוד ה-QR באפליקציה כדי לצלם ולהפקיד צ'ק (עד 499,999 ₪).</p>
+      <div class="flex flex-col items-center gap-3">
+        <div class="relative w-36 h-36 bg-slate-100 border border-line rounded-xl flex items-center justify-center">
+          ${!isAmountBelowThreshold ? `<div class="absolute -top-2 right-1/2 translate-x-1/2 bg-growth text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full whitespace-nowrap">מומלץ לסכום שבחרת</div>` : ''}
+          <span class="material-symbols-outlined text-5xl text-slate-300">qr_code_2</span>
+        </div>
+        <div class="text-sm text-slate-600">צ'ק לפקודת: <span class="font-semibold text-ink">בי טי בי נאמנויות בע"מ</span></div>
+      </div>`;
+  }
+  renderSummaryButton();
+}
+function goToBankSite(){ showToast('מעבר מאובטח לאתר הבנק...'); }
+function copyText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text); }
+  showToast('הפרטים הועתקו');
+}
+function selectMethod(key){ currentMethod=key; renderMethods(); }
+function renderSummaryButton(){
+  const container = document.getElementById('summary-btn-container');
+  if(currentMethod==='transfer' && transferMode==='auto'){
+    container.innerHTML = `<button class="btn-brand w-full py-3.5 rounded-xl font-semibold" onclick="goToBankSite()">מעבר לאתר הבנק להפקדה</button>`;
+  } else {
+    container.innerHTML = `<button class="btn-brand w-full py-3.5 rounded-xl font-semibold" onclick="reportDeposit()">דיווח על ביצוע הפקדה</button>`;
+  }
+}
+function reportDeposit(){
+  showToast('הדיווח נשלח — ההפקדה בטיפול');
+  journeyState.deposit='reported';
+  const today=new Date(); const dateStr=String(today.getDate()).padStart(2,'0')+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+today.getFullYear();
+  deposits.unshift({date:dateStr, type:'דיווח על הפקדה', amount:journeyState.depositInfo.amount, step:1});
+  renderJourney();
+  setTimeout(()=>goto('dashboard'),700);
+}
+
+/* ---------- MY DEPOSITS ---------- */
+let deposits=[
+  {date:'09-07-2026', type:'הפקדה בבנקאות פתוחה', amount:100, step:1},
+  {date:'08-07-2026', type:'דיווח על הפקדה', amount:1222, step:1},
+  {date:'02-07-2026', type:'העברה בנקאית', amount:25000, step:4}
+];
+const stepLabels=['ממתין לקבלת הכספים','בדיקת מסמכים','שיוך לחשבון','הופקד לחשבון'];
+function renderDeposits(){
+  document.getElementById('deposits-list').innerHTML = deposits.map((d,i)=>`
+    <button class="w-full flex items-center justify-between p-4 text-right hover:bg-slate-50" onclick="toggleDeposit(${i})">
+      <span class="text-xs text-slate-400">${d.date}</span>
+      <span class="text-sm">${d.type}</span>
+      <span class="disp font-bold" dir="ltr">${d.amount.toLocaleString()} ₪</span>
+      <span class="pill ${d.step===4?'bg-growth/10 text-growth':'bg-amber/10 text-amber'}">${stepLabels[d.step-1]}</span>
+    </button>
+    <div class="hidden px-4 pb-4" id="dep-tracker-${i}">
+      <div class="flex items-center gap-1 pt-2">
+        ${[1,2,3,4].map(s=>`<div class="flex-1 flex flex-col items-center">
+          <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${s<d.step?'bg-growth text-white':s===d.step?'bg-brand text-white':'bg-slate-100 text-slate-400'}">${s<d.step?'✓':s}</div>
+          <span class="text-[9px] mt-1 text-slate-500">${stepLabels[s-1]}</span>
+        </div>${s<4?`<div class="flex-1 h-[2px] mb-4 ${s<d.step?'bg-growth':'bg-slate-200'}"></div>`:''}`).join('')}
+      </div>
+    </div>`).join('');
+}
+function toggleDeposit(i){ document.getElementById('dep-tracker-'+i).classList.toggle('hidden'); }
+
+/* ---------- ONBOARDING ---------- */
+let idMethod='upload';
+const docs={ idFront:'missing', idBack:'missing', idOld:'missing', bank:'missing' };
+let autentixVerified=false, onboardStep=1;
+function renderOnboardSteps(){
+  document.getElementById('onboard-steps').innerHTML=[1,2,3].map(s=>`
+    <div class="flex items-center gap-1 flex-1">
+      <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold ${s<onboardStep?'bg-growth text-white':s===onboardStep?'bg-brand text-ink':'bg-slate-100 text-slate-400'}">${s<onboardStep?'✓':s}</div>
+      ${s<3?`<div class="flex-1 h-[2px] ${s<onboardStep?'bg-growth':'bg-slate-200'}"></div>`:''}
+    </div>`).join('');
+}
+function goOnboardStep(s){ onboardStep=s; [1,2,3].forEach(n=>document.getElementById('onboard-step-'+n).classList.toggle('hidden', n!==s)); renderOnboardSteps(); }
+function tryGoStep2(){
+  if(idMethod==='autentix'){
+    if(!autentixVerified){ showToast('נא לאמת זהות עם Autentix לפני שממשיכים'); return; }
+  } else {
+    if(idFormat==='biometric'){
+      if(docs.idFront==='missing' || docs.idBack==='missing'){ showToast('נא להעלות צילום קדמי וגם צילום גב לפני שממשיכים'); return; }
+    } else {
+      if(docs.idOld==='missing'){ showToast('נא להעלות צילום תעודת זהות לפני שממשיכים'); return; }
+    }
+  }
+  goOnboardStep(2);
+}
+function tryGoStep3(){
+  if(docs.bank==='missing'){ showToast('נא להעלות אישור ניהול חשבון בנק לפני שממשיכים'); return; }
+  goOnboardStep(3);
+}
+function selectIdMethod(m){
+  idMethod=m;
+  document.querySelectorAll('[data-id-method]').forEach(el=>el.classList.toggle('border-brand', el.dataset.idMethod===m));
+  document.getElementById('id-upload-box').classList.toggle('hidden', m!=='upload');
+  document.getElementById('autentix-box').classList.toggle('hidden', m!=='autentix');
+}
+let idFormat='biometric';
+function selectIdFormat(fmt){
+  idFormat=fmt;
+  document.querySelectorAll('#id-format-toggle button').forEach(b=>{
+    const on = b.dataset.format===fmt;
+    b.classList.toggle('bg-brand', on); b.classList.toggle('text-ink', on); b.classList.toggle('text-slate-500', !on);
+  });
+  document.getElementById('id-format-biometric').classList.toggle('hidden', fmt!=='biometric');
+  document.getElementById('id-format-old').classList.toggle('hidden', fmt!=='old');
+}
+function handleDocUpload(input, key){
+  if(!input.files || !input.files[0]) return;
+  docs[key]='pending';
+  document.getElementById(key+'-status-text').textContent='בבדיקה...';
+  document.getElementById(key+'-icon').textContent='hourglass_top';
+  document.getElementById(key+'-icon').className='material-symbols-outlined text-3xl text-amber';
+  setTimeout(()=>{
+    const ok=Math.random()<0.85;
+    docs[key]=ok?'valid':'invalid';
+    document.getElementById(key+'-status-text').textContent=ok?'מסמך תקין':'לא תקין - נסו שוב';
+    document.getElementById(key+'-icon').textContent=ok?'check_circle':'error';
+    document.getElementById(key+'-icon').className='material-symbols-outlined text-3xl '+(ok?'text-growth':'text-danger');
+  },1400);
+}
+function startAutentix(){
+  const btn=document.getElementById('autentix-btn');
+  btn.textContent='מאמת...'; btn.disabled=true;
+  setTimeout(()=>{ autentixVerified=true; btn.outerHTML='<div class="inline-flex items-center gap-1 text-growth font-semibold text-sm"><span class="material-symbols-outlined">check_circle</span>מאומת</div>'; },1400);
+}
+let docFormStatus = { fatca:'missing', kyc:'missing', service:'missing' };
+function markDocBadge(key, status){
+  const badge=document.getElementById(key+'-doc-badge');
+  const labels = { missing:'לא מולא', pending:'נפתח במערכת חיצונית...', filled:'מולא' };
+  const styles = { missing:'bg-slate-100 text-slate-400', pending:'bg-amber/10 text-amber', filled:'bg-growth/10 text-growth' };
+  badge.textContent = labels[status];
+  badge.className = 'text-[10px] font-semibold px-2 py-0.5 rounded-full ' + styles[status];
+}
+function openDigitalDoc(key){
+  if(docFormStatus[key]==='filled'){ showToast('המסמך הזה כבר נחתם'); return; }
+  if(docFormStatus[key]==='pending') return;
+  docFormStatus[key]='pending';
+  markDocBadge(key,'pending');
+  document.getElementById(key+'-doc-btn').disabled = true;
+  showToast('נפתחת מערכת מסמכים דיגיטליים חיצונית...');
+  setTimeout(()=>{
+    docFormStatus[key]='filled';
+    markDocBadge(key,'filled');
+    document.getElementById(key+'-doc-btn').disabled = false;
+    showToast('המסמך מולא ונחתם בהצלחה');
+  }, 1600);
+}
+function submitOnboarding(){
+  if(Object.values(docFormStatus).some(s=>s!=='filled')){
+    showToast('יש למלא את שלושת הטפסים לפני השליחה');
+    return;
+  }
+  showToast('הפרטים נשלחו לאישור');
+  onboardStep=4; // mark all 3 steps as complete in the step indicator
+  renderOnboardSteps();
+  journeyState.kyc='pending';
+  renderJourney();
+  goto('dashboard');
+}
+
+/* ---------- JOURNEY (signature dashboard element) ---------- */
+let journeyState = { deposit:'none', kyc:'none', depositInfo:null };
+function renderJourney(){
+  const el=document.getElementById('journey-card');
+  const d=journeyState.deposit, k=journeyState.kyc;
+  const dDone = d==='reported', kDone = k==='done', kPending = k==='pending';
+  let message, cta, ctaAction, tone='ink';
+  if(d==='none' && k==='none'){
+    message='כל השקעה מתחילה בתכנון נכון, בואו לבחור מבין המסלולים המצוינים שלנו.';
+    cta='תכנון ההשקעה שלי'; ctaAction="goto('invest')";
+  } else if(d==='none' && kPending){
+    message='המסמכים שלכם בבדיקה. בינתיים, מוכנים לבחור מסלול השקעה?';
+    cta='תכנון ההשקעה שלי'; ctaAction="goto('invest')"; tone='amber';
+  } else if(d==='none' && kDone){
+    message='הזהות שלכם מאומתת! נותר רק לבחור מסלול השקעה ולהפקיד.';
+    cta='תכנון ההשקעה שלי'; ctaAction="goto('invest')"; tone='growth';
+  } else if(d==='in_progress'){
+    message = journeyState.depositInfo && journeyState.depositInfo.monthly
+      ? 'המסלול שבחרתם מחכה לכם — נותר להשלים הפקדה חד-פעמית ולהקים הוראת קבע חודשית.'
+      : 'המסלול שבחרתם מחכה לכם — נותר להשלים את ההפקדה.';
+    cta='להשלמת ההפקדה'; ctaAction="goto('deposit')"; tone='amber';
+  } else if(k==='none'){
+    message='כל יום שאתם לא מזוהים הוא כסף שאתם מפסידים — נותר רק לאמת זהות.';
+    cta='לאימות זהות'; ctaAction="goto('onboarding')"; tone='danger';
+  } else if(kPending){
+    message='המסמכים שלכם בבדיקה — נעדכן אתכם בקרוב.';
+    cta=null; tone='amber';
+  } else {
+    message='הכל מוכן! ההשקעה שלכם פעילה ומניבה רווח.';
+    cta=null; tone='growth';
+  }
+  const toneColor = tone==='danger'?'#B8433C':tone==='amber'?'#B8792E':tone==='growth'?'#1F7A5C':'#14171F';
+  el.innerHTML = `
+    <div class="flex items-center gap-4 mb-5">
+      <div class="flex-1 flex items-center gap-2">
+        <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${dDone?'bg-growth text-white':'bg-brand text-ink'}">${dDone?'✓':'1'}</div>
+        <span class="text-sm font-semibold hidden sm:inline">הפקידו לחשבון</span>
+      </div>
+      <div class="flex-1 h-[2px] ${dDone?'bg-growth':'bg-slate-200'}"></div>
+      <div class="flex-1 flex items-center gap-2 justify-end">
+        <span class="text-sm font-semibold hidden sm:inline">אמתו זהות</span>
+        <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${kDone?'bg-growth text-white':(dDone?'bg-brand text-ink':'bg-slate-100 text-slate-400')}">${kDone?'✓':'2'}</div>
+      </div>
+    </div>
+    <p class="disp text-xl font-bold mb-2" style="color:${toneColor}">${message}</p>
+    ${journeyState.depositInfo && d==='in_progress' ? `<p class="text-sm text-slate-500 mb-3">${journeyState.depositInfo.route} · ${journeyState.depositInfo.amount.toLocaleString()} ₪${journeyState.depositInfo.monthly?' (חד-פעמי)':''} · ריבית ${journeyState.depositInfo.rate}%${journeyState.depositInfo.monthly?` · + הוראת קבע חודשית של ${journeyState.depositInfo.monthly.toLocaleString()} ₪`:''}</p>` : ''}
+    ${cta ? `<button class="btn-brand px-6 py-2.5 rounded-xl font-semibold text-sm" onclick="${ctaAction}">${cta}</button>` : ''}
+  `;
+}
+
+/* ---------- FAQ ---------- */
+const faqItems=[
+  {q:'כיצד עובד חשבון הנאמנות?', a:'כספי המשקיעים מנוהלים בחשבון נאמנות נפרד על ידי נאמן חיצוני בלתי תלוי, ואינם מעורבבים עם כספי הפעילות השוטפת של החברה.'},
+  {q:'מהו מנגנון ה-Reinvest?', a:'תשלומי קרן וריבית מושקעים מחדש באופן אוטומטי בהלוואות חדשות במסלול שבחרתם, כל עוד לא הוגשה בקשת משיכה.'},
+  {q:'מיהם הלווים?', a:'יחידים ועסקים קטנים-בינוניים שעברו תהליך חיתום ובדיקת סיכון על ידי צוות הסיכונים של החברה.'},
+  {q:'האם כל הריבית מועברת למשקיעים?', a:'לא. מנוכים דמי ניהול והפרשה לקופה לערבות הדדית (בשנתיים הראשונות בלבד, במסלולים הרלוונטיים). היתרה מועברת כריבית נטו.'},
+  {q:'מה קורה בפיגור בהלוואה?', a:'צוות הגבייה פונה ללווה, ובמידת הצורך ההלוואה עוברת להליך גבייה משפטי. הקופה לערבות הדדית עשויה לקזז חלק מההפסד.'}
+];
+function renderFaq(){
+  document.getElementById('faq-list').innerHTML = faqItems.map((it,i)=>`
+    <button class="w-full flex items-center justify-between p-4 text-right" onclick="toggleFaq(${i})">
+      <span class="font-semibold text-sm">${it.q}</span>
+      <span class="material-symbols-outlined text-slate-400" id="faq-icon-${i}">expand_more</span>
+    </button>
+    <div class="hidden px-4 pb-4" id="faq-a-${i}"><p class="text-sm text-slate-500 leading-relaxed">${it.a}</p></div>`).join('');
+}
+function toggleFaq(i){ document.getElementById('faq-a-'+i).classList.toggle('hidden'); }
+
+/* ---------- INIT ---------- */
+renderRoutesExplainerCards('routes-carousel', 'dashboard'); renderCarousel('dashboard');
+renderDuration(); updateSliderFill();
+updateInvest(); renderRouteRow(); renderCarousel('invest');
+updateIncomeSliderFill();
+updateIncome();
+restoreIncomeState();
+updateSavSliderFill('sav-initial-slider');
+updateSavSliderFill('sav-monthly-slider');
+updateSavSliderFill('sav-years-slider');
+renderCarousel('savings');
+renderSavingsRouteRow();
+updateSavingsCalc();
+renderMethods();
+renderDeposits();
+renderOnboardSteps();
+selectIdMethod('upload');
+selectIdFormat('biometric');
+renderJourney();
+renderFaq();
+</script>
+</body>
+</html>
