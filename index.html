@@ -776,9 +776,7 @@ let currentIncomeRoute='bmatch', currentMonthlyIncome=3000;
 /* ---------- ROUTE CAROUSEL (single card + arrows, used on dashboard/invest/income) ---------- */
 const routeKeys = Object.keys(routes);
 function getContextRoutes(context){
-  // Passive Income (monthly withdrawal) only supports routes that offer a monthly withdrawal option.
-  // B-GOLD and B-STATE have no such option, so they are excluded there.
-  return context==='income' ? ['neo','bmatch'] : routeKeys;
+  return routeKeys;
 }
 let dashboardCarouselIndex = routeKeys.indexOf('bmatch');
 
