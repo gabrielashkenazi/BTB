@@ -41,6 +41,9 @@
   input[type=range]{ -webkit-appearance:none; width:100%; background:transparent; }
   input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:3px; background:linear-gradient(to left, #FCA5A5 var(--pct,10%), #E6E2D9 var(--pct,10%)); }
   input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:2.5px solid #FCA5A5; margin-top:-7px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.15); }
+  input[type=range].duration-slider-compact{ width:160px; }
+  input[type=range].duration-slider-compact::-webkit-slider-runnable-track{ height:4px; }
+  input[type=range].duration-slider-compact::-webkit-slider-thumb{ width:14px; height:14px; border-width:2px; margin-top:-5px; }
   .pill{ display:inline-flex; align-items:center; gap:.3rem; font-size:11px; font-weight:600; padding:.2rem .55rem; border-radius:9999px; }
   .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:#14171F; color:#fff; padding:.8rem 1.4rem; border-radius:.7rem; font-size:.85rem; font-weight:500; opacity:0; pointer-events:none; transition:all .3s; z-index:200; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
@@ -252,17 +255,6 @@
           <span id="range-start">100 ₪</span>
           <span id="range-end">1,000,000 ₪</span>
         </div>
-        <div class="mt-[10.8px]">
-          <div class="text-sm font-medium text-slate-500 text-center mb-2">תקופה (שנים)</div>
-          <div class="flex items-center justify-center gap-1 mb-2">
-            <span class="disp text-3xl font-bold" id="duration-value">3</span>
-          </div>
-          <input class="w-full" id="duration-slider" max="10" min="1" step="1" type="range" value="3">
-          <div class="flex justify-between mt-2 text-[11px] text-slate-400">
-            <span>1</span>
-            <span>10</span>
-          </div>
-        </div>
         <button class="btn-brand w-full py-3 rounded-xl font-semibold mt-4" id="amount-continue-btn" onclick="revealStep2()">המשך לבחירת מסלול</button>
       </div>
 
@@ -285,8 +277,13 @@
         </div>
 
         <div class="card p-5 lg:p-6">
-          <div class="mb-4">
+          <div class="flex items-center justify-between gap-3 mb-4">
             <span class="font-semibold text-sm">כיצד תיראה ההשקעה שלי?</span>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] text-slate-400 whitespace-nowrap">תקופה (שנים)</span>
+              <input class="duration-slider-compact" id="duration-slider" max="10" min="1" step="1" type="range" value="3">
+              <span class="disp text-sm font-bold" id="duration-value">3</span>
+            </div>
           </div>
           <div class="max-w-sm mx-auto" id="breakdown-grid">
             <div class="flex justify-between items-center py-1.5 text-sm">
