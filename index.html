@@ -758,9 +758,9 @@
       <div class="card p-5 mb-4" id="deposit-account-form">
         <div class="text-sm font-semibold mb-3">מאיזה חשבון מבוצעת ההפקדה?</div>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <select class="border border-line rounded-lg p-2.5 text-sm"><option>לאומי</option><option>הפועלים</option><option>דיסקונט</option></select>
-          <input class="border border-line rounded-lg p-2.5 text-sm" placeholder="סניף">
-          <input class="border border-line rounded-lg p-2.5 text-sm" placeholder="מספר חשבון">
+          <select class="border border-line rounded-lg p-2.5 text-sm" id="dep-bank-select"><option value="">בחרו בנק</option><option>לאומי</option><option>הפועלים</option><option>דיסקונט</option></select>
+          <input class="border border-line rounded-lg p-2.5 text-sm" id="dep-branch-input" placeholder="סניף">
+          <input class="border border-line rounded-lg p-2.5 text-sm" id="dep-account-input" placeholder="מספר חשבון">
         </div>
       </div>
       <div class="card p-5 mb-4" id="deposit-detail"><!-- injected --></div>
@@ -931,6 +931,23 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- BANK DETAILS REQUIRED MODAL -->
+<div class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4" id="bank-details-modal">
+  <div class="card w-full max-w-sm p-5">
+    <div class="flex items-center justify-between mb-3">
+      <div class="font-bold text-sm">נדרשים פרטי חשבון הבנק</div>
+      <button class="text-slate-400 hover:text-brandtext" onclick="closeBankDetailsModal()"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <p class="text-sm text-slate-600 leading-relaxed mb-4">כדי לשייך את הכספים לחשבון ההשקעה שלכם ב-BTB, יש להזין את פרטי חשבון הבנק ממנו בוצעה ההעברה.</p>
+    <div class="space-y-3">
+      <select class="w-full border border-line rounded-lg p-2.5 text-sm" id="modal-bank-select"><option value="">בחרו בנק</option><option>לאומי</option><option>הפועלים</option><option>דיסקונט</option></select>
+      <input class="w-full border border-line rounded-lg p-2.5 text-sm" id="modal-branch-input" placeholder="סניף">
+      <input class="w-full border border-line rounded-lg p-2.5 text-sm" id="modal-account-input" placeholder="מספר חשבון">
+    </div>
+    <button class="btn-brand w-full py-3 rounded-xl font-semibold mt-4" onclick="confirmBankDetails()">שמירה והמשך</button>
+  </div>
+</div>
 
 <script>
 /* ---------- NAV ---------- */
@@ -1890,10 +1907,37 @@ function selectMethod(key){ currentMethod=key; renderMethods(); }
 function renderSummaryButton(){
   const container = document.getElementById('summary-btn-container');
   if(currentMethod==='transfer' && transferMode==='auto'){
-    container.innerHTML = `<button class="btn-brand w-full py-3.5 rounded-xl font-semibold" onclick="goToBankSite()">מעבר לאתר הבנק להפקדה</button>`;
+    container.innerHTML = `<button class="btn-brand w-full py-3.5 rounded-xl font-semibold" onclick="requireBankDetails('bank')">מעבר לאתר הבנק להפקדה</button>`;
   } else {
-    container.innerHTML = `<button class="btn-brand w-full py-3.5 rounded-xl font-semibold" onclick="reportDeposit()">דיווח על ביצוע הפקדה</button>`;
+    container.innerHTML = `<button class="btn-brand w-full py-3.5 rounded-xl font-semibold" onclick="requireBankDetails('report')">דיווח על ביצוע הפקדה</button>`;
   }
+}
+function isBankDetailsFilled(){
+  return document.getElementById('dep-bank-select').value.trim()!=='' &&
+    document.getElementById('dep-branch-input').value.trim()!=='' &&
+    document.getElementById('dep-account-input').value.trim()!=='';
+}
+let pendingDepositAction=null;
+function requireBankDetails(action){
+  if(currentMethod!=='transfer' || isBankDetailsFilled()){ proceedDeposit(action); return; }
+  pendingDepositAction=action;
+  document.getElementById('bank-details-modal').classList.remove('hidden');
+}
+function closeBankDetailsModal(){ document.getElementById('bank-details-modal').classList.add('hidden'); pendingDepositAction=null; }
+function confirmBankDetails(){
+  const bank=document.getElementById('modal-bank-select').value.trim();
+  const branch=document.getElementById('modal-branch-input').value.trim();
+  const account=document.getElementById('modal-account-input').value.trim();
+  if(!bank || !branch || !account){ showToast('נא למלא את כל פרטי החשבון'); return; }
+  document.getElementById('dep-bank-select').value=bank;
+  document.getElementById('dep-branch-input').value=branch;
+  document.getElementById('dep-account-input').value=account;
+  document.getElementById('bank-details-modal').classList.add('hidden');
+  const action=pendingDepositAction; pendingDepositAction=null;
+  if(action) proceedDeposit(action);
+}
+function proceedDeposit(action){
+  if(action==='bank') goToBankSite(); else reportDeposit();
 }
 function reportDeposit(){
   showToast('הדיווח נשלח — ההפקדה בטיפול');
