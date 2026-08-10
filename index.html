@@ -41,9 +41,6 @@
   input[type=range]{ -webkit-appearance:none; width:100%; background:transparent; }
   input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:3px; background:linear-gradient(to left, #FCA5A5 var(--pct,10%), #E6E2D9 var(--pct,10%)); }
   input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:2.5px solid #FCA5A5; margin-top:-7px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.15); }
-  input[type=range].duration-slider-compact{ width:160px; }
-  input[type=range].duration-slider-compact::-webkit-slider-runnable-track{ height:4px; }
-  input[type=range].duration-slider-compact::-webkit-slider-thumb{ width:14px; height:14px; border-width:2px; margin-top:-5px; }
   .pill{ display:inline-flex; align-items:center; gap:.3rem; font-size:11px; font-weight:600; padding:.2rem .55rem; border-radius:9999px; }
   .toast{ position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px); background:#14171F; color:#fff; padding:.8rem 1.4rem; border-radius:.7rem; font-size:.85rem; font-weight:500; opacity:0; pointer-events:none; transition:all .3s; z-index:200; }
   .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
@@ -66,6 +63,7 @@
   }
   html.force-mobile aside.desktop-sidebar{ display:none !important; }
   html.force-mobile main{ margin-right:0 !important; padding-left:1rem; padding-right:1rem; max-width:100% !important; }
+  html.force-mobile #manager-popover{ top:64px !important; bottom:auto !important; right:1rem !important; }
   html.force-mobile #profit-net{ font-size:1.5rem !important; }
   html.force-mobile #income-required-amount{ font-size:1.25rem !important; }
   html.force-mobile #total-deposits-stat{ font-size:1.125rem !important; }
@@ -88,7 +86,17 @@
     .stack-mobile{ flex-direction:column; align-items:flex-start; }
   }
   html.force-mobile .stack-mobile{ flex-direction:column !important; align-items:flex-start !important; }
+  html.force-mobile #breakdown-grid{ grid-template-columns:1fr !important; }
   html.force-mobile #savings-results-grid{ grid-template-columns:1fr !important; }
+  html.force-mobile #pf-hero-grid{ grid-template-columns:1fr !important; }
+  html.force-mobile #pf-deposits-grid{ grid-template-columns:1fr !important; }
+  html.force-mobile #pf-purchased-grid{ grid-template-columns:1fr !important; }
+  html.force-mobile #pf-balances-grid{ grid-template-columns:1fr !important; }
+  html.force-mobile .pf-route-stat-grid{ grid-template-columns:1fr !important; }
+  html.force-mobile .pf-route-secondary-grid{ grid-template-columns:1fr !important; }
+  @media (max-width: 1023px){
+    #manager-popover{ top:64px !important; bottom:auto !important; right:1rem !important; }
+  }
 </style>
 </head>
 <body>
@@ -111,18 +119,26 @@
       <button class="text-slate-400" onclick="closeMobileDrawer()"><span class="material-symbols-outlined">close</span></button>
     </div>
     <nav class="flex flex-col gap-1" id="mobile-nav-items">
-      <div class="nav-item" data-screen="dashboard" onclick="closeMobileDrawer()">דשבורד</div>
-      <div class="nav-item" data-screen="invest" onclick="closeMobileDrawer()">תכנון השקעה</div>
-      <div class="nav-item" data-screen="income" onclick="closeMobileDrawer()">הכנסה חודשית קבועה</div>
-      <div class="nav-item" data-screen="savings" onclick="closeMobileDrawer()">חיסכון לכל מטרה</div>
-      <div class="nav-item" data-screen="deposits" onclick="closeMobileDrawer()">ההפקדות שלי</div>
-      <div class="nav-item" data-screen="onboarding" onclick="closeMobileDrawer()">אימות והכרות</div>
-      <div class="nav-item" data-screen="faq" onclick="closeMobileDrawer()">מרכז המידע</div>
+      <div class="nav-item" data-screen="dashboard" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">space_dashboard</span>דשבורד</div>
+      <div class="nav-item" data-screen="portfolio" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">pie_chart</span>התיק שלי</div>
+      <div class="nav-item" data-screen="invest" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">trending_up</span>תכנון השקעה</div>
+      <div class="nav-item" data-screen="income" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">monetization_on</span>הכנסה חודשית קבועה</div>
+      <div class="nav-item" data-screen="savings" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">timeline</span>חיסכון לכל מטרה</div>
+      <div class="nav-item" data-screen="deposits" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">receipt_long</span>ההפקדות שלי</div>
+      <div class="nav-item" data-screen="onboarding" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">verified_user</span>אימות והכרות</div>
+      <div class="nav-item" data-screen="faq" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">help</span>מרכז המידע</div>
     </nav>
     <div class="mt-8 pt-6 border-t border-line space-y-1">
       <button class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-right">
         <span class="material-symbols-outlined text-slate-500">settings</span>
         <span class="text-sm font-medium">הגדרות</span>
+      </button>
+      <button class="w-full flex items-center gap-2 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-right" id="manager-btn-mobile" onclick="toggleManager()">
+        <div class="w-9 h-9 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold text-xs flex-shrink-0">נ.כ</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-semibold truncate">נאור כהן</div>
+          <div class="text-[10px] text-slate-400">מנהל התיק שלך</div>
+        </div>
       </button>
     </div>
   </div>
@@ -136,20 +152,50 @@
       </div>
     </div>
     <nav class="flex flex-col gap-1 px-3">
-      <div class="nav-item active" data-screen="dashboard">דשבורד</div>
-      <div class="nav-item" data-screen="invest">תכנון השקעה</div>
-      <div class="nav-item" data-screen="income">הכנסה חודשית קבועה</div>
-      <div class="nav-item" data-screen="savings">חיסכון לכל מטרה</div>
-      <div class="nav-item" data-screen="deposits">ההפקדות שלי</div>
-      <div class="nav-item" data-screen="onboarding">אימות והכרות</div>
-      <div class="nav-item" data-screen="faq">מרכז המידע</div>
+      <div class="nav-item active" data-screen="dashboard"><span class="material-symbols-outlined text-lg">space_dashboard</span>דשבורד</div>
+      <div class="nav-item" data-screen="portfolio"><span class="material-symbols-outlined text-lg">pie_chart</span>התיק שלי</div>
+      <div class="nav-item" data-screen="invest"><span class="material-symbols-outlined text-lg">trending_up</span>תכנון השקעה</div>
+      <div class="nav-item" data-screen="income"><span class="material-symbols-outlined text-lg">monetization_on</span>הכנסה חודשית קבועה</div>
+      <div class="nav-item" data-screen="savings"><span class="material-symbols-outlined text-lg">timeline</span>חיסכון לכל מטרה</div>
+      <div class="nav-item" data-screen="deposits"><span class="material-symbols-outlined text-lg">receipt_long</span>ההפקדות שלי</div>
+      <div class="nav-item" data-screen="onboarding"><span class="material-symbols-outlined text-lg">verified_user</span>אימות והכרות</div>
+      <div class="nav-item" data-screen="faq"><span class="material-symbols-outlined text-lg">help</span>מרכז המידע</div>
     </nav>
     <div class="mt-auto px-3 space-y-3">
+      <button class="w-full flex items-center gap-2 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-right" id="manager-btn" onclick="toggleManager()">
+        <div class="w-8 h-8 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold text-xs flex-shrink-0">נ.כ</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-semibold truncate">נאור כהן</div>
+          <div class="text-[10px] text-slate-400">מנהל התיק שלך</div>
+        </div>
+        <span class="material-symbols-outlined text-slate-300 text-base">chevron_left</span>
+      </button>
       <a class="flex items-center gap-2 px-2.5 text-[11px] text-slate-400 hover:text-brandtext transition-colors" href="#">
         <span class="material-symbols-outlined text-sm">smartphone</span>גם באפליקציה — הורידו את BTB
       </a>
     </div>
   </aside>
+
+  <!-- MANAGER POPOVER -->
+  <div class="hidden fixed bottom-24 right-[236px] w-64 card shadow-xl p-4 z-40" id="manager-popover">
+    <div class="flex items-center gap-3 mb-3">
+      <div class="w-11 h-11 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold">נ.כ</div>
+      <div>
+        <div class="font-semibold text-sm">נאור כהן</div>
+        <a class="text-xs text-brandtext" href="mailto:naorc@btbisrael.co.il">naorc@btbisrael.co.il</a>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <a class="flex-1 flex flex-col items-center gap-1 bg-growth/5 border border-growth/20 rounded-lg py-2" href="https://wa.me/972507599662" target="_blank" rel="noopener">
+        <span class="material-symbols-outlined text-growth text-lg">chat</span>
+        <span class="text-[11px] font-semibold" dir="ltr">050-7599662</span>
+      </a>
+      <a class="flex-1 flex flex-col items-center gap-1 bg-slate-50 border border-line rounded-lg py-2" href="tel:0732073277">
+        <span class="material-symbols-outlined text-slate-600 text-lg">call</span>
+        <span class="text-[11px] font-semibold" dir="ltr">073-2073277</span>
+      </a>
+    </div>
+  </div>
 
   <!-- MAIN -->
   <main class="flex-1 mr-0 lg:mr-[220px] px-5 lg:px-10 py-6 lg:py-8 max-w-5xl">
@@ -169,7 +215,45 @@
       <p class="text-slate-500 mb-6 -mt-3">בוקר טוב, גבריאל</p>
 
       <!-- JOURNEY (signature element) -->
+      <button class="text-xs text-slate-400 border border-line rounded-full px-3 py-1 mb-2 hover:bg-slate-50" id="journey-demo-toggle" onclick="toggleJourneyDemoMode()">תצוגת דמו: לקוח חדש (הצג לקוח קיים)</button>
       <div class="card p-6 lg:p-8 mb-6" id="journey-card"><!-- injected by JS --></div>
+
+      <!-- COMMERCIAL CROSS-SELL OFFERS (bank-style, usage-triggered) -->
+      <div class="mb-6">
+        <div class="font-semibold text-sm mb-2 px-0.5">הצעות בשבילכם</div>
+        <div class="flex gap-3 overflow-x-auto pb-2 -mx-0.5 px-0.5" style="scroll-snap-type:x proximity;">
+          <div class="flex-shrink-0 w-60 card p-4" style="scroll-snap-align:start;">
+            <span class="material-symbols-outlined text-brandtext text-2xl mb-2">directions_car</span>
+            <div class="text-sm font-bold mb-1">הלוואה לרכישת רכב</div>
+            <p class="text-xs text-slate-500 mb-3">רואים שאתם חוסכים לרכב? אין צורך לחכות — אפשר לקבל הלוואה נוחה כבר עכשיו.</p>
+            <button class="text-brandtext text-xs font-semibold flex items-center gap-1" onclick="showToast('בקרוב — פרטים על הלוואה לרכב')">בדקו זכאות<span class="material-symbols-outlined text-sm">arrow_back</span></button>
+          </div>
+          <div class="flex-shrink-0 w-60 card p-4" style="scroll-snap-align:start;">
+            <span class="material-symbols-outlined text-brandtext text-2xl mb-2">account_balance</span>
+            <div class="text-sm font-bold mb-1">הלוואה כנגד תיק ההשקעות</div>
+            <p class="text-xs text-slate-500 mb-3">צריכים מזומן? קבלו הלוואה בתנאים נוחים כנגד התיק שלכם, בלי לפגוע בהשקעה הקיימת.</p>
+            <button class="text-brandtext text-xs font-semibold flex items-center gap-1" onclick="showToast('בקרוב — פרטים על הלוואה כנגד תיק')">בדקו זכאות<span class="material-symbols-outlined text-sm">arrow_back</span></button>
+          </div>
+          <div class="flex-shrink-0 w-60 card p-4" style="scroll-snap-align:start;">
+            <span class="material-symbols-outlined text-brandtext text-2xl mb-2">credit_card</span>
+            <div class="text-sm font-bold mb-1">כרטיס אשראי ON</div>
+            <p class="text-xs text-slate-500 mb-3">כרטיס אשראי חדש, מחובר ישירות לחשבון ההשקעות שלכם ב-ON.</p>
+            <button class="text-brandtext text-xs font-semibold flex items-center gap-1" onclick="showToast('בקרוב — פרטים על כרטיס ON')">גלו עוד<span class="material-symbols-outlined text-sm">arrow_back</span></button>
+          </div>
+          <div class="flex-shrink-0 w-60 card p-4" style="scroll-snap-align:start;">
+            <span class="material-symbols-outlined text-brandtext text-2xl mb-2">payments</span>
+            <div class="text-sm font-bold mb-1">כרטיס אשראי כנגד תקבולים</div>
+            <p class="text-xs text-slate-500 mb-3">מקבלים הכנסה חודשית קבועה מהשקעה? אפשר גם כרטיס אשראי שמתבסס עליה.</p>
+            <button class="text-brandtext text-xs font-semibold flex items-center gap-1" onclick="showToast('בקרוב — פרטים על כרטיס כנגד תקבולים')">גלו עוד<span class="material-symbols-outlined text-sm">arrow_back</span></button>
+          </div>
+          <div class="flex-shrink-0 w-60 card p-4" style="scroll-snap-align:start;">
+            <span class="material-symbols-outlined text-brandtext text-2xl mb-2">home</span>
+            <div class="text-sm font-bold mb-1">הצעת משכנתא</div>
+            <p class="text-xs text-slate-500 mb-3">בדרך לדירה? נבדוק לכם הצעת משכנתא מותאמת אישית, בהתאם ליעד החיסכון שלכם.</p>
+            <button class="text-brandtext text-xs font-semibold flex items-center gap-1" onclick="showToast('בקרוב — פרטים על הצעת משכנתא')">בדקו זכאות<span class="material-symbols-outlined text-sm">arrow_back</span></button>
+          </div>
+        </div>
+      </div>
 
       <!-- DIVERSIFICATION VIDEO TILE (BTB's own homepage animation) -->
       <div class="card overflow-hidden mb-3">
@@ -177,7 +261,7 @@
           <source src="https://www.btbisrael.co.il/wp-content/uploads/2025/05/switching-machines-2.42_1.mp4" type="video/mp4">
         </video>
         <div class="p-3 text-center">
-          <div class="font-semibold text-sm">ההשקעה שלכם מושקעת באלפי עסקים</div>
+          <div class="font-semibold text-sm">ההשקעה שלכם מושקעת ב-4,658 עסקים</div>
         </div>
       </div>
 
@@ -225,6 +309,150 @@
           </div>
           <button class="text-brandtext text-sm font-semibold flex items-center gap-1 flex-shrink-0" data-goto="income">גלו עוד<span class="material-symbols-outlined text-base">arrow_back</span></button>
         </div>
+      </div>
+    </section>
+
+    <!-- ============ MY PORTFOLIO (existing customer with an active portfolio) ============ -->
+    <section class="screen" id="screen-portfolio">
+
+      <p class="text-slate-500 mb-5 -mt-3">אז מה התיק שלי עשה?</p>
+
+      <!-- HERO: the one number that matters most, answered with zero ambiguity -->
+      <div class="rounded-2xl p-6 mb-4" style="background:linear-gradient(135deg, #FCA5A5, #F58F8F);">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="pf-hero-grid">
+          <div class="text-center">
+            <div class="text-[11px] text-ink/60 mb-1">סך צבירה ברוטו</div>
+            <div class="flex items-center justify-center gap-1.5">
+              <span class="text-xs font-semibold text-growth bg-growth/10 px-1.5 py-0.5 rounded-full whitespace-nowrap" id="pf-hero-gross-pct">+0%</span>
+              <span class="disp text-xl sm:text-2xl font-bold break-words text-ink" id="pf-hero-balance" dir="ltr">₪0</span>
+            </div>
+          </div>
+          <div class="text-center">
+            <div class="text-[11px] text-ink/60 mb-1">הכנסה מריבית עד היום</div>
+            <div class="disp text-xl sm:text-2xl font-bold break-words text-center text-ink" id="pf-hero-interest" dir="ltr">₪0</div>
+          </div>
+          <div class="text-center">
+            <div class="text-[11px] text-ink/60 mb-1">רווח חודש קודם</div>
+            <div class="disp text-xl sm:text-2xl font-bold break-words text-center text-ink" id="pf-hero-lastmonth" dir="ltr">₪0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERFORMANCE CHART: stock-market style, dynamic Y-axis, range selector -->
+      <div class="card p-5 lg:p-6 mb-4">
+        <div class="flex items-center justify-between mb-1">
+          <span class="font-bold text-sm">ביצועי התיק</span>
+          <span class="flex items-center gap-1 text-xs font-semibold text-growth bg-growth/10 px-1.5 py-0.5 rounded-full whitespace-nowrap" id="pf-perf-change" dir="ltr">+0%</span>
+        </div>
+        <div id="pf-perf-chart"></div>
+        <div class="flex justify-center gap-1.5 mt-3" id="pf-perf-range-selector"></div>
+      </div>
+
+      <!-- THE RECEIPT: gross to net, one line at a time, nothing hidden -->
+      <div class="card p-5 lg:p-6 mb-4">
+        <div class="font-bold text-sm mb-1">שווי התיק שלי נטו</div>
+        <p class="text-xs text-slate-500 mb-4">כמה התיק שלי שווה לאחר כל הניכויים בלי הפתעות</p>
+
+        <div class="space-y-0" id="pf-waterfall">
+          <!-- injected by JS -->
+        </div>
+
+        <label class="flex items-start gap-2 mt-4 pt-4 border-t border-line cursor-pointer">
+          <input class="w-4 h-4 accent-brand mt-0.5" id="pf-include-red-toggle" type="checkbox">
+          <span class="text-xs text-slate-600">מה יקרה אם אמכור עכשיו גם את ההלוואות שבפיגור (האדומות)? <span class="text-slate-400">— לחצו כדי לראות את ההשפעה על הסכום שתקבלו</span></span>
+        </label>
+      </div>
+
+      <!-- MERGED: where your money is invested + gross vs net rate, per route -->
+      <div class="card p-5 lg:p-6 mb-4">
+        <div class="font-bold text-sm mb-1">איפה הכסף שלכם מושקע</div>
+        <p class="text-xs text-slate-500 mb-4">לכל מסלול יש גם ריבית "על הנייר" (ברוטו) וגם ריבית שבאמת נכנסת לכיס שלכם (נטו) — ההפרש הוא כל העמלות שראיתם למעלה.</p>
+        <div class="space-y-3" id="pf-routes-breakdown"><!-- injected by JS --></div>
+      </div>
+
+      <!-- Total deposits vs current return, with growth chart -->
+      <div class="card p-5 lg:p-6 mb-4">
+        <div class="font-bold text-sm mb-1">סך ההפקדות מול התשואה שלכם</div>
+        <p class="text-xs text-slate-500 mb-4">כמה הכנסתם לתיק במצטבר, כמה משכתם בדרך, וכמה זה שווה היום.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4" id="pf-deposits-grid">
+          <div class="text-center p-3 rounded-xl bg-slate-50">
+            <div class="text-[11px] text-slate-500 mb-1">סך הפקדות</div>
+            <div class="disp text-lg font-bold break-words" id="pf-total-deposits" dir="ltr">₪0</div>
+          </div>
+          <div class="text-center p-3 rounded-xl bg-slate-50">
+            <div class="text-[11px] text-slate-500 mb-1">סך משיכות</div>
+            <div class="disp text-lg font-bold text-danger break-words" id="pf-total-withdrawals" dir="ltr">₪0</div>
+          </div>
+          <div class="text-center p-3 rounded-xl bg-growth/10">
+            <div class="text-[11px] text-slate-500 mb-1">סך צבירה ברוטו</div>
+            <div class="disp text-lg font-bold text-growth break-words" id="pf-total-return" dir="ltr">₪0</div>
+          </div>
+        </div>
+        <div id="pf-growth-chart"></div>
+        <div class="flex items-center justify-center gap-4 mt-2 text-[11px] text-slate-400">
+          <span class="flex items-center gap-1.5"><span class="w-3 h-[3px] rounded-full inline-block" style="background:#1F7A5C"></span>שווי התיק</span>
+          <span class="flex items-center gap-1.5"><span class="w-3 h-[2px] rounded-full inline-block" style="background:repeating-linear-gradient(to right, #94a3b8 0 4px, transparent 4px 7px)"></span>הפקדות בניכוי משיכות</span>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-3 pt-3 border-t border-line">* כל ירידה בקו המקווקו מייצגת משיכה מהתיק. ההפרש בין שני הקווים, בכל נקודת זמן, הוא הרווח שנצבר עד אותו רגע.</p>
+      </div>
+
+      <!-- LOAN HEALTH: green / yellow / red, in plain language -->
+      <div class="card p-5 lg:p-6">
+        <div class="font-bold text-sm mb-1">מצב ההלוואות בתיק שלכם</div>
+        <p class="text-xs text-slate-500 mb-4">התיק שלכם מפוזר בין 4,686 הלוואות קטנות. רוב הכסף (<span id="pf-green-pct-inline">90%</span>) נמצא בהלוואות שמשולמות כרגיל. חלק קטן באיחור.</p>
+
+        <div class="flex w-full h-3 rounded-full overflow-hidden mb-4" id="pf-health-bar"></div>
+
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div>
+            <div class="flex items-center justify-center gap-1 mb-1"><span class="w-2.5 h-2.5 rounded-full bg-growth inline-block"></span><span class="text-[11px] text-slate-500">משולמות כרגיל</span></div>
+            <div class="disp text-sm font-bold" id="pf-green-amount" dir="ltr">₪0</div>
+            <div class="text-[11px] text-slate-400" id="pf-green-pct">0%</div>
+          </div>
+          <div>
+            <div class="flex items-center justify-center gap-1 mb-1"><span class="w-2.5 h-2.5 rounded-full bg-amber inline-block"></span><span class="text-[11px] text-slate-500">בפיגור קל</span></div>
+            <div class="disp text-sm font-bold" id="pf-yellow-amount" dir="ltr">₪0</div>
+            <div class="text-[11px] text-slate-400" id="pf-yellow-pct">0%</div>
+          </div>
+          <div>
+            <div class="flex items-center justify-center gap-1 mb-1"><span class="w-2.5 h-2.5 rounded-full bg-danger inline-block"></span><span class="text-[11px] text-slate-500">בהליך גבייה</span></div>
+            <div class="disp text-sm font-bold" id="pf-red-amount" dir="ltr">₪0</div>
+            <div class="text-[11px] text-slate-400" id="pf-red-pct">0%</div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-4 pt-3 border-t border-line">* הלוואות "בהליך גבייה" הן הלוואות שהלווה לא עומד בתשלומים, ואנחנו פועלים לגבות אותן בחזרה. אפשר להמשיך ולנסות לגבות אותן במלואן, או למכור אותן עכשיו במחיר מוזל (בממוצע כ-5% מתחת לערכן) ולקבל את הכסף מהר יותר.</p>
+      </div>
+
+      <!-- Loans purchased at the customer's own request (proactive risk-loan purchases) -->
+      <div class="card p-5 lg:p-6 mt-4 mb-4">
+        <div class="font-bold text-sm mb-1">הלוואות שנרכשו לבקשתכם</div>
+        <p class="text-xs text-slate-500 mb-4">בעבר בחרתם לרכוש באופן יזום הלוואות בסיכון מוגבר (בתוספת תשואה), מעבר לפיזור האוטומטי הרגיל של המסלול.</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="pf-purchased-grid">
+          <div class="text-center p-3 rounded-xl" style="background:#B8792E0D">
+            <div class="text-[11px] text-slate-500 mb-1">רכישת הלוואות צהובות</div>
+            <div class="disp text-lg font-bold text-amber break-words" id="pf-purchased-yellow" dir="ltr">₪0</div>
+          </div>
+          <div class="text-center p-3 rounded-xl" style="background:#B8433C0D">
+            <div class="text-[11px] text-slate-500 mb-1">רכישת הלוואות אדומות / אפורות</div>
+            <div class="disp text-lg font-bold text-danger break-words" id="pf-purchased-red" dir="ltr">₪0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional balances: accrued receipts ready for withdrawal, and idle cash awaiting new loans -->
+      <div class="card p-5 lg:p-6">
+        <div class="font-bold text-sm mb-1">יתרות נוספות בתיק</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="pf-balances-grid">
+          <div class="text-center p-3 rounded-xl bg-slate-50">
+            <div class="text-[11px] text-slate-500 mb-1">תקבולים צבורים למשיכה</div>
+            <div class="disp text-lg font-bold break-words" id="pf-accrued-receipts" dir="ltr">₪0</div>
+          </div>
+          <div class="text-center p-3 rounded-xl bg-slate-50">
+            <div class="text-[11px] text-slate-500 mb-1">יתרה זמינה להלוואות</div>
+            <div class="disp text-lg font-bold break-words" id="pf-available-balance" dir="ltr">₪0</div>
+          </div>
+        </div>
+        <p class="text-[11px] text-slate-400 mt-3 pt-3 border-t border-line">* "תקבולים צבורים למשיכה" — כספים שכבר נפרעו מלווים וממתינים לפעולה שלכם (משיכה או השקעה מחדש). "יתרה זמינה להלוואות" — כסף שעדיין לא הוקצה להלוואה ומחכה להשקעה הבאה.</p>
       </div>
     </section>
 
@@ -276,41 +504,48 @@
           <div class="flex gap-2 overflow-x-auto pb-1 mb-6" id="route-row"></div>
         </div>
 
-        <div class="card p-5 lg:p-6">
-          <div class="flex items-center justify-between gap-3 mb-4">
-            <span class="font-semibold text-sm">כיצד תיראה ההשקעה שלי?</span>
-            <div class="flex items-center gap-2">
-              <span class="text-[11px] text-slate-400 whitespace-nowrap">תקופה (שנים)</span>
-              <input class="duration-slider-compact" id="duration-slider" max="10" min="1" step="1" type="range" value="3">
-              <span class="disp text-sm font-bold" id="duration-value">3</span>
-            </div>
+        <!-- Investment duration slider (positioned near route/risk selection) -->
+        <div class="card p-5 mb-4">
+          <div class="text-sm font-medium text-slate-500 text-center mb-2">תקופת ההשקעה</div>
+          <div class="flex items-center justify-center gap-1 mb-3">
+            <span class="disp text-2xl font-bold" id="invest-years-display">3</span>
+            <span class="text-lg text-slate-400">שנים</span>
           </div>
-          <div class="max-w-sm mx-auto" id="breakdown-grid">
-            <div class="flex justify-between items-center py-1.5 text-sm">
-              <span class="text-slate-500">שווי ההשקעה שלי ברוטו</span>
-              <span class="flex items-center gap-2">
-                <span class="text-xs font-semibold text-growth bg-growth/10 px-1.5 py-0.5 rounded-full whitespace-nowrap" id="profit-return-pct">+0%</span>
-                <span class="font-semibold text-base" id="profit-portfolio">₪0</span>
-              </span>
-            </div>
-            <button class="w-full flex justify-between items-center py-1.5 text-sm" onclick="toggleExpenses()">
-              <span class="text-slate-500">הוצאות</span>
-              <span class="flex items-center gap-1">
-                <span id="profit-expenses">-₪0</span>
-                <span class="material-symbols-outlined text-base text-slate-400" id="expenses-chevron">expand_more</span>
-              </span>
-            </button>
-            <div class="hidden pe-3 space-y-1 border-e-2 border-line" id="expenses-detail">
-              <div class="flex justify-between text-xs text-slate-500 py-1"><span>דמי ניהול</span><span id="profit-mgmt">-₪0</span></div>
-              <div class="flex justify-between text-xs text-slate-500 py-1"><span>הפרשה לקופה הדדית</span><span id="profit-fund">-₪0</span></div>
-              <p class="text-[11px] text-slate-400 pt-2">* ההפרשה לקופה ההדדית מחושבת לשנתיים הראשונות בלבד</p>
-            </div>
-            <div class="flex justify-between items-center pt-3">
-              <div>
-                <div class="text-xs text-growth font-semibold">רווח נטו צפוי</div>
-                <p class="text-[10px] text-slate-400 mt-0.5 max-w-[150px]">אינו כולל 15% מס רווחי הון</p>
+          <input class="w-full" id="invest-years-slider" max="5" min="1" type="range" value="3">
+          <div class="flex justify-between mt-2 text-[11px] text-slate-400"><span>שנה 1</span><span>5 שנים</span></div>
+        </div>
+
+        <div class="card p-5 lg:p-6">
+          <div class="mb-4">
+            <span class="font-semibold text-sm">כיצד תיראה ההשקעה שלי?</span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center" id="breakdown-grid">
+            <div class="text-sm">
+              <div class="flex justify-between items-center py-1.5">
+                <span class="text-slate-500">שווי ההשקעה שלי ברוטו</span>
+                <span class="flex items-center gap-2">
+                  <span class="text-xs font-semibold text-growth bg-growth/10 px-1.5 py-0.5 rounded-full whitespace-nowrap" id="profit-return-pct">+0%</span>
+                  <span class="font-semibold text-base" id="profit-portfolio">₪0</span>
+                </span>
               </div>
+              <button class="w-full flex justify-between items-center py-1.5" onclick="toggleExpenses()">
+                <span class="text-slate-500">הוצאות</span>
+                <span class="flex items-center gap-1">
+                  <span id="profit-expenses">-₪0</span>
+                  <span class="material-symbols-outlined text-base text-slate-400" id="expenses-chevron">expand_more</span>
+                </span>
+              </button>
+              <div class="hidden pe-3 space-y-1 border-e-2 border-line" id="expenses-detail">
+                <div class="flex justify-between text-xs text-slate-500 py-1"><span>הפרשות מתשלומי ריבית</span><span id="profit-interest-fee">-₪0</span></div>
+                <div class="flex justify-between text-xs text-slate-500 py-1"><span>דמי ניהול</span><span id="profit-mgmt">-₪0</span></div>
+                <div class="flex justify-between text-xs text-slate-500 py-1"><span>הפרשה לקופה הדדית</span><span id="profit-fund">-₪0</span></div>
+                <p class="text-[11px] text-slate-400 pt-2">* ההפרשה לקופה ההדדית מחושבת ומשולמת ב-24 תשלומים חודשיים שווים, החל מחודש לאחר ההפקדה</p>
+              </div>
+            </div>
+            <div class="bg-growth/5 border border-growth/15 rounded-xl p-5 text-center">
+              <div class="text-xs text-growth font-semibold mb-1">רווח נטו צפוי</div>
               <div class="disp text-2xl sm:text-4xl font-bold text-growth break-words" id="profit-net">₪0</div>
+              <p class="text-[10px] text-slate-400 mt-1">אינו כולל 15% מס רווחי הון</p>
             </div>
           </div>
           <button class="btn-brand w-full py-3.5 rounded-xl font-semibold mt-5" id="invest-cta">המשך להפקדה</button>
@@ -388,7 +623,7 @@
     <section class="screen" id="screen-savings">
 
       <div class="card p-5 mb-4">
-        <p class="text-sm text-slate-600 leading-relaxed text-center">הקימו תכנית חיסכון לטווח ארוך: בחרו יעד, סכום התחלתי והפקדה חודשית קבועה, עם צמיחה לפי המסלול שתבחרו.</p>
+        <p class="text-sm text-slate-600 leading-relaxed text-center">הקימו תכנית חיסכון לטווח ארוך (התקופה הנבחרת היא ללא התחייבות): בחרו יעד, סכום התחלתי והפקדה חודשית קבועה, עם צמיחה לפי המסלול שתבחרו.</p>
       </div>
 
       <!-- Built-in plans (prominent, distinct callout) -->
@@ -474,7 +709,10 @@
 
       <!-- Years -->
       <div class="card p-5 mb-4">
-        <div class="text-sm font-medium text-slate-500 text-center mb-2">תקופת החיסכון</div>
+        <div class="flex items-center justify-center gap-1.5 mb-2">
+          <span class="text-sm font-medium text-slate-500">תקופת החיסכון</span>
+          <span class="material-symbols-outlined text-base text-slate-400 cursor-help" title="תקופת החיסכון היא ללא התחייבות ומסייעת בתכנון ההשקעה לטווח ארוך, תקופת הנזילות של כל מסלול מצוינת על גבי המסלול">info</span>
+        </div>
         <div class="flex items-center justify-center gap-1 mb-3">
           <span class="disp text-2xl font-bold" id="sav-years-display">10</span>
           <span class="text-lg text-slate-400">שנים</span>
@@ -736,7 +974,7 @@
 
 <script>
 /* ---------- NAV ---------- */
-const titles = { dashboard:'דשבורד', invest:'כמה תרצו להשקיע?', income:'כמה תרצו להכניס כל חודש?', savings:'לאיזו מטרה תרצו לחסוך?', 'savings-analysis':'ניתוח השקעה', deposit:'הפקדה', deposits:'ההפקדות שלי', onboarding:'אימות והכרות', faq:'מרכז המידע' };
+const titles = { dashboard:'דשבורד', portfolio:'התיק שלי', invest:'כמה תרצו להשקיע?', income:'כמה תרצו להכניס כל חודש?', savings:'לאיזו מטרה תרצו לחסוך?', 'savings-analysis':'ניתוח השקעה', deposit:'הפקדה', deposits:'ההפקדות שלי', onboarding:'אימות והכרות', faq:'מרכז המידע' };
 function switchScreen(screen){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+screen).classList.add('active');
@@ -752,6 +990,7 @@ document.querySelectorAll('[data-goto]').forEach(el=>el.addEventListener('click'
 
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 
+function toggleManager(){ document.getElementById('manager-popover').classList.toggle('hidden'); }
 function openMobileDrawer(){ document.getElementById('mobile-drawer-backdrop').classList.remove('hidden'); document.getElementById('mobile-drawer').classList.add('open'); }
 function closeMobileDrawer(){ document.getElementById('mobile-drawer-backdrop').classList.add('hidden'); document.getElementById('mobile-drawer').classList.remove('open'); }
 function toggleMobilePreview(){
@@ -759,11 +998,15 @@ function toggleMobilePreview(){
   document.getElementById('view-toggle-icon').textContent = isMobile ? 'desktop_windows' : 'smartphone';
   document.getElementById('view-toggle-label').textContent = isMobile ? 'תצוגת דסקטופ' : 'תצוגת מובייל';
 }
+document.addEventListener('click',(e)=>{
+  const pop=document.getElementById('manager-popover'), btn=document.getElementById('manager-btn'), btnMobile=document.getElementById('manager-btn-mobile');
+  if(!pop.classList.contains('hidden') && !pop.contains(e.target) && !btn.contains(e.target) && !btnMobile.contains(e.target)) pop.classList.add('hidden');
+});
 
 /* ---------- SHARED DATA ---------- */
 const routes = {
   neo:{ name:'NEO', rate:0.0395, mgmt:0, fund:0, tag:'נזילות מיידית', color:'#64748B', textColor:'#64748B', desc:'מסלול המאפשר שימוש מהיר בכספים' },
-  bmatch:{ name:'B-MATCH', rate:0.0831, mgmt:0.007, fund:0.01, tag:'נזילות מהירה', color:'#FCA5A5', textColor:'#C2447A', desc:'מסלול עם פיזור מקסימלי ללא תקופת מינימום' },
+  bmatch:{ name:'B-MATCH', rate:0.0831, mgmt:0.0076, fund:0.01, tag:'נזילות מהירה', color:'#FCA5A5', textColor:'#C2447A', desc:'מסלול עם פיזור מקסימלי ללא תקופת מינימום' },
   bgold:{ name:'B-GOLD', rate:0.0819, mgmt:0.008, fund:0.01, tag:'נזיל כל 18 חודשים', color:'#B8792E', textColor:'#B8792E', desc:'כל ההלוואות מגובות בשעבודים' },
   iron:{ name:'B-STATE', rate:0.0475, mgmt:0, fund:0, tag:'נזיל כל 12 חודשים', color:'#1F7A5C', textColor:'#1F7A5C', desc:'כל ההלוואות בערבות המדינה' }
 };
@@ -773,6 +1016,9 @@ let currentIncomeRoute='bmatch', currentMonthlyIncome=3000;
 /* ---------- ROUTE CAROUSEL (single card + arrows, used on dashboard/invest/income) ---------- */
 const routeKeys = Object.keys(routes);
 function getContextRoutes(context){
+  // Previously restricted 'income' to NEO/B-MATCH only (no monthly withdrawal option on B-GOLD/B-STATE).
+  // Reverted for now — showing all 4 routes again; the calculation engine (computeRequiredAmount)
+  // already handles all 4 correctly regardless of this display restriction.
   return routeKeys;
 }
 let dashboardCarouselIndex = routeKeys.indexOf('bmatch');
@@ -875,10 +1121,10 @@ function renderRouteFocusRow(containerId, selectedKey, onSelect, statFn, caption
     const isSelected = key===selectedKey;
     const isBmatch = key==='bmatch';
     const stat = statFn(key);
+    const badge = isBmatch ? `<div class="absolute -top-2 right-3 bg-brand text-ink text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap">מומלץ</div>` : '';
     if(isSelected){
       const isExpanded = cardExpanded[context];
       const feeText = (r.mgmt+r.fund)>0 ? `דמי ניהול ${(r.mgmt*100).toFixed(1)}%${isBmatch?' (לא כולל ערבות מדינה)':''}` : 'ללא הוצאות נוספות מלבד מס';
-      const badge = isBmatch ? `<div class="absolute top-0 right-1/2 translate-x-[calc(50%-5rem)] flex items-center justify-center bg-brand text-ink text-[20px] font-bold px-4 py-1.5 rounded-b-lg whitespace-nowrap leading-none z-10">מומלץ</div>` : '';
       return `<div class="relative flex-[2.2] min-w-[190px] p-4 rounded-xl border-2 text-right transition-all cursor-pointer" style="border-color:${r.color}" onclick="${onSelect}('${key}')">
         ${badge}
         <button class="absolute top-2 left-2 w-6 h-6 rounded-full border border-line flex items-center justify-center text-slate-400 hover:text-brandtext hover:border-brandtext" onclick="event.stopPropagation(); toggleCardExpand('${context}')" title="עוד מידע על המסלול">
@@ -891,7 +1137,6 @@ function renderRouteFocusRow(containerId, selectedKey, onSelect, statFn, caption
           <div class="flex items-center gap-1 text-[10px] text-slate-400 mt-1">${feeText}<span class="material-symbols-outlined text-xs">info</span></div>` : ''}
       </div>`;
     }
-    const badge = isBmatch ? `<div class="absolute top-0 right-1/2 translate-x-1/2 flex items-center justify-center bg-brand text-ink text-[20px] font-bold px-4 py-1.5 rounded-b-lg whitespace-nowrap leading-none z-10">מומלץ</div>` : '';
     return `<button class="relative flex-1 min-w-[64px] p-3 rounded-xl border ${isBmatch?'border-brand':'border-line'} text-center opacity-50 hover:opacity-90 transition-opacity" onclick="${onSelect}('${key}')">
       ${badge}
       <div class="flex items-center justify-center gap-1 mb-1"><span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background:${r.color}"></span><span class="text-xs font-semibold truncate">${r.name}</span></div>
@@ -943,22 +1188,55 @@ function toggleExpenses(){
   chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 function updateSliderFill(){ const pct=(slider.value-slider.min)/(slider.max-slider.min)*100; slider.style.setProperty('--pct',pct+'%'); }
+function calculateInvestmentProjection(A, years, routeKey){
+  const r = routes[routeKey];
+  const hasFees = routeKey==='bmatch' || routeKey==='bgold';
+  const monthlyRate = Math.pow(1+r.rate, 1/12) - 1;
+  let balance = A;
+  let totalMgmtFee = 0, totalFundFee = 0, totalInterestFee = 0;
+  const totalMonths = years*12;
+  for(let m=1; m<=totalMonths; m++){
+    const startBalance = balance;
+    const grossMonthlyInterest = balance * monthlyRate;
+    const preFeeEOM = balance + grossMonthlyInterest;
+    // Management fee is charged on the AVERAGE portfolio value this month — including
+    // accrued interest, not just the fixed original deposit — using the average of the
+    // opening balance and this month's pre-fee closing balance (avoids circular reference).
+    const avgValue = (startBalance + preFeeEOM) / 2;
+    let mgmtFee = 0, fundFee = 0, interestFee = 0;
+    if(hasFees){
+      mgmtFee = (r.mgmt/12) * avgValue;
+      fundFee = (m<=24) ? (A * r.fund) / 24 : 0; // fund fee is 1% of the DEPOSIT amount specifically, unchanged
+      interestFee = grossMonthlyInterest * 0.01;
+    }
+    balance = preFeeEOM - mgmtFee - fundFee - interestFee;
+    totalMgmtFee += mgmtFee;
+    totalFundFee += fundFee;
+    totalInterestFee += interestFee;
+  }
+  const netProfit = balance - A;
+  const totalExpenses = totalMgmtFee + totalFundFee + totalInterestFee;
+  const grossProfit = netProfit + totalExpenses; // gross defined so gross - expenses = net, exactly
+  return { grossProfit, mgmtFee:totalMgmtFee, fundFee:totalFundFee, interestFee:totalInterestFee, totalExpenses, netProfit, portfolioValue:balance };
+}
 function updateInvest(manual){
   currentAmount = manual!==undefined ? manual : mapAmount(slider.value);
   document.getElementById('amount-display').textContent = currentAmount.toLocaleString();
-  const r=routes[currentRoute];
-  const gross=Math.floor(currentAmount*(Math.pow(1+r.rate,years)-1));
-  const mgmt=Math.floor(currentAmount*r.mgmt*years);
-  const fund=Math.floor(currentAmount*r.fund*Math.min(years,2));
-  const expenses=mgmt+fund;
+  const proj = calculateInvestmentProjection(currentAmount, years, currentRoute);
+  const gross=Math.floor(proj.grossProfit);
+  const mgmt=Math.floor(proj.mgmtFee);
+  const fund=Math.floor(proj.fundFee);
+  const interestFee=Math.floor(proj.interestFee);
+  const expenses=mgmt+fund+interestFee;
   const net=gross-expenses;
-  const portfolioValue=currentAmount+gross;
+  const portfolioValue=Math.floor(currentAmount+gross);
   const returnPct = currentAmount>0 ? (gross/currentAmount*100) : 0;
   document.getElementById('profit-portfolio').textContent='₪'+portfolioValue.toLocaleString();
   document.getElementById('profit-return-pct').textContent='+'+returnPct.toFixed(1)+'%';
   document.getElementById('profit-expenses').textContent='-₪'+expenses.toLocaleString();
   document.getElementById('profit-mgmt').textContent='-₪'+mgmt.toLocaleString();
   document.getElementById('profit-fund').textContent='-₪'+fund.toLocaleString();
+  document.getElementById('profit-interest-fee').textContent='-₪'+interestFee.toLocaleString();
   document.getElementById('profit-net').textContent='₪'+net.toLocaleString();
 }
 slider.addEventListener('input', ()=>{ updateSliderFill(); updateInvest(); });
@@ -971,15 +1249,15 @@ function toggleStage(){
     : '<span class="material-symbols-outlined text-xs">swap_vert</span> מתחת למיליון ₪';
   updateInvest();
 }
-const durationSlider = document.getElementById('duration-slider');
-function updateDurationSliderFill(){ const pct=(durationSlider.value-durationSlider.min)/(durationSlider.max-durationSlider.min)*100; durationSlider.style.setProperty('--pct',pct+'%'); }
-function setYears(y){
-  years=parseInt(y);
-  document.getElementById('duration-value').textContent=years;
-  updateDurationSliderFill();
+const investYearsSlider = document.getElementById('invest-years-slider');
+function updateInvestYearsSliderFill(){ const el=investYearsSlider; const pct=(el.value-el.min)/(el.max-el.min)*100; el.style.setProperty('--pct',pct+'%'); }
+function setYears(y){ years=y; updateInvest(); }
+investYearsSlider.addEventListener('input', ()=>{
+  years = parseInt(investYearsSlider.value);
+  document.getElementById('invest-years-display').textContent = years;
+  updateInvestYearsSliderFill();
   updateInvest();
-}
-durationSlider.addEventListener('input', ()=>setYears(durationSlider.value));
+});
 
 /* manual entry (shared for amount + income) */
 function startEdit(kind){
@@ -1225,7 +1503,7 @@ function renderSavingsChart(yearly, initial){
   const balSeries = [{year:0, value:initial}, ...yearly.map(r=>({year:r.year, value:r.balance}))];
   const maxVal = Math.max(...balSeries.map(p=>p.value), ...depSeries.map(p=>p.value), 1);
   const maxYear = Math.max(yearly.length, 1);
-  const x = yr => (w-padR) - (yr/maxYear)*(w-padL-padR);
+  const x = yr => padL + (yr/maxYear)*(w-padL-padR);
   const y = val => (h-padB) - (val/maxVal)*(h-padT-padB);
   const path = series => series.map((p,i)=> (i===0?'M':'L')+x(p.year).toFixed(1)+','+y(p.value).toFixed(1)).join(' ');
   const svg = `
@@ -1235,7 +1513,7 @@ function renderSavingsChart(yearly, initial){
     <path d="${path(depSeries)}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4"/>
     <path d="${path(balSeries)}" fill="none" stroke="#1F7A5C" stroke-width="2.5"/>
   </svg>
-  <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+  <div class="flex justify-between text-[11px] text-slate-400 mt-1" dir="ltr">
     <span>שנה 0</span>
     <span>שנה ${maxYear}</span>
   </div>
@@ -1290,6 +1568,285 @@ function applySavingsPreset(name, customConfig){
   updateSavingsCalc();
   showToast(preset.toast);
 }
+
+/* ---------- MY PORTFOLIO (existing customer) ---------- */
+const pfHoldings = [
+  { routeKey:'bmatch', balance: 80000 },
+  { routeKey:'neo', balance: 20000 },
+];
+// pfHoldings.balance = ORIGINAL amount invested per route (cost basis) — NOT current value.
+// All figures below are derived from calculateInvestmentProjection() (the exact same formula
+// used in Investment Planning, documented in BLP-5063), projected 1 year forward, so this
+// screen can never silently drift out of sync with the real calculation engine.
+const pfSgFeeRate = 0.0009; // 0.09% State Guarantee provision, on B-MATCH balance
+function getPortfolioProjection(){
+  let totalPrincipal=0, totalGrossProfit=0, totalMgmt=0, totalFund=0, totalInterestFee=0, totalNet=0, totalFundRemaining=0, totalSgFee=0;
+  const perRoute = pfHoldings.map(h=>{
+    const r = routes[h.routeKey];
+    const proj = calculateInvestmentProjection(h.balance, 1, h.routeKey);
+    // Fund fee is spread over 24 equal monthly installments. proj.fundFee (from a 1-year/12-month
+    // projection) represents exactly the first 12 of those 24 installments — i.e. what's already
+    // been accrued so far. The other 12 installments are still owed, and become due immediately
+    // upon withdrawal/exit.
+    const fundFeeRemaining = (h.balance * r.fund) - proj.fundFee;
+    const sgFee = h.routeKey==='bmatch' ? h.balance * pfSgFeeRate : 0;
+    totalPrincipal += h.balance;
+    totalGrossProfit += proj.grossProfit;
+    totalMgmt += proj.mgmtFee;
+    totalFund += proj.fundFee;
+    totalInterestFee += proj.interestFee;
+    totalNet += proj.netProfit;
+    totalFundRemaining += fundFeeRemaining;
+    totalSgFee += sgFee;
+    return { ...h, proj, sgFee, fundFeeRemaining, currentValue: h.balance + proj.grossProfit };
+  });
+  return { perRoute, totalPrincipal, totalGrossProfit, totalMgmt, totalFund, totalInterestFee, totalNet, totalFundRemaining, totalSgFee };
+}
+const pfTaxRate = 0.15;
+const pfPurchasedYellow = 1200;
+const pfPurchasedRed = 450;
+const pfAccruedReceipts = 620;
+const pfAvailableBalance = 1850;
+const pfLoanHealth = { green:0.90, yellow:0.07, red:0.03 };
+let pfExpensesExpanded = false;
+function togglePfExpenses(){ pfExpensesExpanded = !pfExpensesExpanded; renderPortfolio(); }
+// Illustrative 12-month history: {month, deposits (net of withdrawals, cumulative), value (portfolio value)}
+// Events modeled: deposit ₪60,000 (m1), deposit ₪30,000 (m4), withdrawal ₪10,000 (m7), deposit ₪20,000 (m9)
+const pfTotalDepositsGross = 110000;
+const pfTotalWithdrawals = 10000;
+const pfHistory = [
+  {month:0, deposits:0, value:0},
+  {month:1, deposits:60000, value:60000},
+  {month:2, deposits:60000, value:60360},
+  {month:3, deposits:60000, value:60722},
+  {month:4, deposits:90000, value:91086},
+  {month:5, deposits:90000, value:91633},
+  {month:6, deposits:90000, value:92183},
+  {month:7, deposits:80000, value:82736},
+  {month:8, deposits:80000, value:83232},
+  {month:9, deposits:100000, value:103732},
+  {month:10, deposits:100000, value:104950},
+  {month:11, deposits:100000, value:106170},
+  {month:12, deposits:100000, value:107398},
+];
+const pfRedHaircut = 0.05;
+
+function renderPortfolio(){
+  const p = getPortfolioProjection();
+  const gross = p.totalPrincipal + p.totalGrossProfit;
+  const tax = Math.round(p.totalGrossProfit * pfTaxRate);
+  const netBeforeRed = gross - p.totalMgmt - p.totalFund - Math.round(p.totalSgFee) - p.totalInterestFee - tax;
+  const redAmount = Math.round(gross * pfLoanHealth.red);
+  const redLoss = Math.round(redAmount * pfRedHaircut);
+  const fundFeeRemainingRounded = Math.round(p.totalFundRemaining);
+  const includeRed = document.getElementById('pf-include-red-toggle').checked;
+  const netToday = includeRed ? netBeforeRed - redLoss - fundFeeRemainingRounded : netBeforeRed;
+
+  document.getElementById('pf-hero-balance').textContent = '₪'+Math.round(gross).toLocaleString();
+  const grossPct = (gross - p.totalPrincipal)/p.totalPrincipal*100;
+  document.getElementById('pf-hero-gross-pct').textContent = '+'+grossPct.toFixed(1)+'%';
+  document.getElementById('pf-hero-interest').textContent = '₪'+Math.round(p.totalGrossProfit).toLocaleString();
+  const totalLastMonthProfit = p.perRoute.reduce((s,h)=>s+Math.round(h.currentValue*routes[h.routeKey].rate/12),0);
+  document.getElementById('pf-hero-lastmonth').textContent = '₪'+totalLastMonthProfit.toLocaleString();
+
+  const totalExpensesAccrued = Math.round(p.totalMgmt) + Math.round(p.totalFund) + Math.round(p.totalSgFee) + Math.round(p.totalInterestFee);
+
+  let waterfallHtml = '';
+  waterfallHtml += `<div class="flex justify-between items-center py-2.5"><span class="text-sm">שווי התיק ברוטו (הקרן + כל הריבית שנצברה)</span><span class="disp text-base font-bold" dir="ltr">₪${Math.round(gross).toLocaleString()}</span></div>`;
+  waterfallHtml += `<button class="w-full flex justify-between items-center py-2 border-t border-line border-dashed" onclick="togglePfExpenses()">
+    <span class="text-xs text-slate-500 flex items-center gap-1">סה"כ הוצאות<span class="material-symbols-outlined text-sm text-slate-400" id="pf-expenses-chevron" style="transition:transform .2s; transform:${pfExpensesExpanded?'rotate(180deg)':'rotate(0deg)'}">expand_more</span></span>
+    <span class="text-sm text-danger font-medium" dir="ltr">-₪${totalExpensesAccrued.toLocaleString()}</span>
+  </button>`;
+  waterfallHtml += `<div class="${pfExpensesExpanded?'':'hidden'} pe-3 space-y-1 border-e-2 border-line mb-1" id="pf-expenses-detail">
+    <div class="flex justify-between text-xs text-slate-500 py-1"><span>הפרשות מתשלומי ריבית</span><span dir="ltr">-₪${Math.round(p.totalInterestFee).toLocaleString()}</span></div>
+    <div class="flex justify-between text-xs text-slate-500 py-1"><span>דמי ניהול שנצברו</span><span dir="ltr">-₪${Math.round(p.totalMgmt).toLocaleString()}</span></div>
+    <div class="py-1">
+      <div class="flex justify-between text-xs text-slate-500"><span>הפרשה לקופה לערבות הדדית — סה"כ הפרשה עד היום (12/24 תשלומים)</span><span dir="ltr">-₪${Math.round(p.totalFund).toLocaleString()}</span></div>
+      <div class="flex justify-between text-[10px] text-slate-400 mt-0.5"><span>יתרה שנותרה להשלמה (12 תשלומים נוספים, נדרשת רק בעת משיכה)</span><span dir="ltr">₪${Math.round(p.totalFundRemaining).toLocaleString()}</span></div>
+    </div>
+    <div class="flex justify-between text-xs text-slate-500 py-1"><span>הפרשה להלוואות בערבות המדינה (0.09%)</span><span dir="ltr">-₪${Math.round(p.totalSgFee).toLocaleString()}</span></div>
+  </div>`;
+  waterfallHtml += `<div class="flex justify-between items-center py-2 border-t border-line border-dashed"><span class="text-xs text-slate-500">מס רווחי הון משוער (15% על הרווח)</span><span class="text-sm text-danger font-medium" dir="ltr">-₪${tax.toLocaleString()}</span></div>`;
+
+  const finalRows = [
+    { label: includeRed ? 'הסכום שתקבלו ממכירת ההלוואות התקינות/בפיגור' : 'שווי תיק נטו', value: netBeforeRed, type: includeRed ? 'subtotal' : 'final', tooltip: includeRed ? null : 'שווי התיק אינו כולל הפסד משוער של 5% ממכירת הלוואות בהליך גבייה, ואינו כולל השלמת יתרת התשלומים לקופה ההדדית שמתחייבת בעת משיכה', pct: includeRed ? null : (netBeforeRed - p.totalPrincipal)/p.totalPrincipal*100 },
+  ];
+  if(includeRed){
+    finalRows.push({ label:'השלמת יתרת התשלומים לקופה ההדדית (12 התשלומים שנותרו מ-24)', value: -fundFeeRemainingRounded, type:'deduct' });
+    finalRows.push({ label:'הפסד משוער ממכירת הלוואות בהליך גבייה (כ-5% מערכן)', value: -redLoss, type:'deduct' });
+    finalRows.push({ label:'הסכום שתקבלו בפועל אם תמשכו הכל היום', value: netToday, type:'final', pct: (netToday - p.totalPrincipal)/p.totalPrincipal*100 });
+  }
+
+  waterfallHtml += finalRows.map(r=>{
+    const isNeg = r.value<0;
+    const displayVal = (isNeg?'-':'')+'₪'+Math.abs(Math.round(r.value)).toLocaleString();
+    if(r.type==='deduct') return `<div class="flex justify-between items-center py-2 border-t border-line border-dashed"><span class="text-xs text-slate-500">${r.label}</span><span class="text-sm text-danger font-medium" dir="ltr">${displayVal}</span></div>`;
+    if(r.type==='subtotal') return `<div class="flex justify-between items-center py-2.5 border-t-2 border-line"><span class="text-xs font-semibold text-slate-600">${r.label}</span><span class="text-sm font-bold" dir="ltr">${displayVal}</span></div>`;
+    const pctBadge = r.pct!=null ? `<span class="text-xs font-semibold text-growth bg-white px-1.5 py-0.5 rounded-full whitespace-nowrap" dir="ltr">+${r.pct.toFixed(1)}%</span>` : '';
+    return `<div class="flex justify-between items-center py-3 mt-1 bg-growth/10 rounded-lg px-3"><span class="text-sm font-bold text-growth flex items-center gap-1">${r.label}${r.tooltip ? `<span class="material-symbols-outlined text-sm text-growth/70 cursor-help" title="${r.tooltip}">info</span>` : ''}</span><span class="flex items-center gap-1.5">${pctBadge}<span class="disp text-2xl font-bold text-growth" dir="ltr">${displayVal}</span></span></div>`;
+  }).join('');
+
+  document.getElementById('pf-waterfall').innerHTML = waterfallHtml;
+
+  document.getElementById('pf-health-bar').innerHTML =
+    `<div style="width:${pfLoanHealth.green*100}%; background:#1F7A5C"></div>`+
+    `<div style="width:${pfLoanHealth.yellow*100}%; background:#B8792E"></div>`+
+    `<div style="width:${pfLoanHealth.red*100}%; background:#B8433C"></div>`;
+  document.getElementById('pf-green-amount').textContent = '₪'+Math.round(gross*pfLoanHealth.green).toLocaleString();
+  document.getElementById('pf-green-pct').textContent = Math.round(pfLoanHealth.green*100)+'%';
+  document.getElementById('pf-green-pct-inline').textContent = Math.round(pfLoanHealth.green*100)+'%';
+  document.getElementById('pf-yellow-amount').textContent = '₪'+Math.round(gross*pfLoanHealth.yellow).toLocaleString();
+  document.getElementById('pf-yellow-pct').textContent = Math.round(pfLoanHealth.yellow*100)+'%';
+  document.getElementById('pf-red-amount').textContent = '₪'+redAmount.toLocaleString();
+  document.getElementById('pf-red-pct').textContent = Math.round(pfLoanHealth.red*100)+'%';
+
+  document.getElementById('pf-routes-breakdown').innerHTML = p.perRoute.map(h=>{
+    const r = routes[h.routeKey];
+    const netRate = h.currentValue>0 ? h.proj.netProfit/h.balance : 0;
+    const pct = Math.round(h.currentValue/gross*100);
+    const monthlyProfit = Math.round(h.currentValue*r.rate/12);
+    return `<div class="p-4 rounded-xl border border-line">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${r.color}"></span>
+        <span class="text-sm font-semibold">${r.name}</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-3 pf-route-stat-grid">
+        <div class="text-center">
+          <div class="text-[10px] text-slate-400 mb-0.5">שווי המסלול</div>
+          <div class="disp text-lg font-bold break-words text-center" dir="ltr">₪${Math.round(h.currentValue).toLocaleString()}</div>
+        </div>
+        <div class="text-center">
+          <div class="text-[10px] text-slate-400 mb-0.5">רווח חודש קודם</div>
+          <div class="disp text-lg font-bold text-growth break-words text-center" dir="ltr">₪${monthlyProfit.toLocaleString()}</div>
+        </div>
+        <div class="text-center">
+          <div class="text-[10px] text-slate-400 mb-0.5">ריבית ממוצעת</div>
+          <div class="disp text-lg font-bold break-words text-center" dir="ltr">${(r.rate*100).toFixed(2)}%</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-x-3 gap-y-1 text-[11px] text-slate-400 pt-2 border-t border-line pf-route-secondary-grid">
+        <span>נטו שנתי (בפועל): ${(netRate*100).toFixed(2)}%</span>
+        <span>אחוז מהתיק: ${pct}%</span>
+        <span>הכנסה מריבית עד היום: ₪${Math.round(h.proj.grossProfit).toLocaleString()}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  renderPortfolioGrowthChart();
+
+  document.getElementById('pf-total-deposits').textContent = '₪'+pfTotalDepositsGross.toLocaleString();
+  document.getElementById('pf-total-withdrawals').textContent = '₪'+pfTotalWithdrawals.toLocaleString();
+  document.getElementById('pf-total-return').textContent = '₪'+Math.round(gross).toLocaleString();
+
+  document.getElementById('pf-purchased-yellow').textContent = '₪'+pfPurchasedYellow.toLocaleString();
+  document.getElementById('pf-purchased-red').textContent = '₪'+pfPurchasedRed.toLocaleString();
+  document.getElementById('pf-accrued-receipts').textContent = '₪'+pfAccruedReceipts.toLocaleString();
+  document.getElementById('pf-available-balance').textContent = '₪'+pfAvailableBalance.toLocaleString();
+}
+
+/* ---------- PERFORMANCE CHART (stock-market style, dynamic Y-axis) ---------- */
+const PF_PERF_RANGES = [
+  { key:'1W', label:'שבוע', days:7 },
+  { key:'1M', label:'חודש', days:30 },
+  { key:'3M', label:'3 חודשים', days:90 },
+  { key:'6M', label:'חצי שנה', days:180 },
+  { key:'1Y', label:'שנה', days:365 },
+];
+let pfPerfRange = '1M';
+function setPfPerfRange(key){ pfPerfRange = key; renderPortfolioGrowthChart(); }
+function generatePerformanceHistory(endValue, days){
+  // A lending portfolio's value only moves in two ways: (a) steady interest accrual — smooth
+  // and monotonically increasing, never random — or (b) an explicit deposit/withdrawal — a sharp,
+  // discrete step on the exact day it happens. The customer deposited the full amount a year ago
+  // and withdrew partway through — so this is a single lump-sum start, one discrete withdrawal,
+  // and smooth compound growth everywhere else.
+  const withdrawalDay = 213; // roughly 7 months in
+  const simulate = (dailyRate) => {
+    let balance = pfTotalDepositsGross;
+    const path = [balance];
+    for(let day=1; day<=364; day++){
+      balance *= (1+dailyRate);
+      if(day===withdrawalDay) balance -= pfTotalWithdrawals;
+      path.push(balance);
+    }
+    return path;
+  };
+  // Binary-search the exact daily rate so the trajectory lands precisely on endValue —
+  // no artificial end-of-chart correction needed.
+  let lo=-0.01, hi=0.01, path;
+  for(let i=0;i<60;i++){
+    const mid=(lo+hi)/2;
+    path = simulate(mid);
+    if(path[path.length-1] < endValue) lo=mid; else hi=mid;
+  }
+  return { values: path.slice(-days) };
+}
+function renderPfPerfRangeSelector(){
+  document.getElementById('pf-perf-range-selector').innerHTML = PF_PERF_RANGES.map(r=>
+    `<button class="px-3 py-1 text-xs font-semibold rounded-full ${r.key===pfPerfRange?'bg-brand text-ink':'text-slate-500 hover:bg-slate-50'}" onclick="setPfPerfRange('${r.key}')">${r.label}</button>`).join('');
+}
+function renderPfPerformanceChart(currentValue){
+  const activeRange = PF_PERF_RANGES.find(r=>r.key===pfPerfRange);
+  const { values: visible } = generatePerformanceHistory(currentValue, activeRange.days);
+
+  // The badge shows the portfolio's actual annual return rate, scaled to this range's time
+  // fraction — not a naive (end-start)/start on the raw value, which gets distorted by
+  // deposit/withdrawal timing (a deposit would misleadingly look like "performance").
+  const netDeposits = pfHistory[pfHistory.length-1].deposits;
+  const annualRate = (currentValue - netDeposits) / netDeposits;
+  const changePct = annualRate * (activeRange.days/365) * 100;
+  const changeUp = changePct >= 0;
+  const changeBadge = document.getElementById('pf-perf-change');
+  changeBadge.textContent = (changeUp?'+':'') + changePct.toFixed(1)+'%';
+  changeBadge.className = `flex items-center gap-1 text-xs font-semibold px-1.5 py-0.5 rounded-full whitespace-nowrap ${changeUp ? 'text-growth bg-growth/10' : 'text-danger bg-danger/10'}`;
+
+  const w=600, h=200, padL=8, padR=8, padT=18, padB=10;
+  const minV = Math.min(...visible), maxV = Math.max(...visible);
+  const range = (maxV-minV) || (maxV*0.05) || 1;
+  const yPad = range*0.2;
+  const yMin = minV-yPad, yMax = maxV+yPad;
+
+  const x = i => padL + (i/(visible.length-1))*(w-padL-padR);
+  const y = v => (h-padB) - ((v-yMin)/(yMax-yMin))*(h-padT-padB);
+  const path = visible.map((v,i)=> (i===0?'M':'L')+x(i).toFixed(1)+','+y(v).toFixed(1)).join(' ');
+  const lineColor = changeUp ? '#1F7A5C' : '#B8433C';
+  const fillId = 'pfPerfFill';
+
+  document.getElementById('pf-perf-chart').innerHTML = `
+    <div class="text-[11px] text-slate-400 mb-1" dir="ltr">שווי גבוה בטווח: ₪${Math.round(maxV).toLocaleString()}</div>
+    <svg viewBox="0 0 ${w} ${h}" class="w-full block" style="max-height:200px" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="${fillId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${lineColor}" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="${lineColor}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${path} L${x(visible.length-1).toFixed(1)},${h-padB} L${x(0).toFixed(1)},${h-padB} Z" fill="url(#${fillId})"/>
+      <path d="${path}" fill="none" stroke="${lineColor}" stroke-width="2.5"/>
+    </svg>
+    <div class="text-[11px] text-slate-400 mt-1" dir="ltr">שווי נמוך בטווח: ₪${Math.round(minV).toLocaleString()}</div>
+  `;
+  renderPfPerfRangeSelector();
+}
+
+function renderPortfolioGrowthChart(){
+  const p = getPortfolioProjection();
+  renderPfPerformanceChart(p.totalPrincipal + p.totalGrossProfit);
+  const w=600, h=180, padL=8, padR=8, padT=10, padB=10;
+  const maxVal = Math.max(...pfHistory.map(p=>Math.max(p.value,p.deposits)), 1);
+  const maxMonth = pfHistory.length-1;
+  const x = i => padL + (i/maxMonth)*(w-padL-padR);
+  const y = val => (h-padB) - (val/maxVal)*(h-padT-padB);
+  const path = key => pfHistory.map((p,i)=> (i===0?'M':'L')+x(i).toFixed(1)+','+y(p[key]).toFixed(1)).join(' ');
+  document.getElementById('pf-growth-chart').innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" class="w-full block" style="max-height:180px" preserveAspectRatio="xMidYMid meet">
+      <line x1="${padL}" y1="${h-padB}" x2="${w-padR}" y2="${h-padB}" stroke="#E6E2D9" stroke-width="1"/>
+      <path d="${path('deposits')}" fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5,4"/>
+      <path d="${path('value')}" fill="none" stroke="#1F7A5C" stroke-width="2.5"/>
+    </svg>`;
+}
+
+document.getElementById('pf-include-red-toggle').addEventListener('change', renderPortfolio);
 
 /* ---------- DEPOSIT ---------- */
 let depositSourceScreen='invest';
@@ -1518,12 +2075,24 @@ function submitOnboarding(){
 
 /* ---------- JOURNEY (signature dashboard element) ---------- */
 let journeyState = { deposit:'none', kyc:'none', depositInfo:null };
+let journeyDemoMode = 'new';
+function toggleJourneyDemoMode(){
+  journeyDemoMode = journeyDemoMode==='new' ? 'existing' : 'new';
+  if(journeyDemoMode==='existing'){ journeyState.deposit='reported'; journeyState.kyc='done'; }
+  else { journeyState.deposit='none'; journeyState.kyc='none'; }
+  renderJourney();
+  const btn = document.getElementById('journey-demo-toggle');
+  if(btn) btn.textContent = journeyDemoMode==='existing' ? 'תצוגת דמו: לקוח קיים (הצג לקוח חדש)' : 'תצוגת דמו: לקוח חדש (הצג לקוח קיים)';
+}
 function renderJourney(){
   const el=document.getElementById('journey-card');
   const d=journeyState.deposit, k=journeyState.kyc;
   const dDone = d==='reported', kDone = k==='done', kPending = k==='pending';
   let message, cta, ctaAction, tone='ink';
-  if(d==='none' && k==='none'){
+  const isExistingCustomerDemo = journeyDemoMode==='existing' && dDone && kDone;
+  if(isExistingCustomerDemo){
+    message=null; tone='growth';
+  } else if(d==='none' && k==='none'){
     message='כל השקעה מתחילה בתכנון נכון, בואו לבחור מבין המסלולים המצוינים שלנו.';
     cta='תכנון ההשקעה שלי'; ctaAction="goto('invest')";
   } else if(d==='none' && kPending){
@@ -1549,7 +2118,29 @@ function renderJourney(){
   }
   const toneColor = tone==='danger'?'#B8433C':tone==='amber'?'#B8792E':tone==='growth'?'#1F7A5C':'#14171F';
   el.innerHTML = `
-    <div class="flex items-center gap-4 mb-5">
+    ${isExistingCustomerDemo ? `<div class="mb-5">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+        <div class="text-center">
+          <div class="text-[11px] text-slate-500 mb-1">סך צבירה ברוטו</div>
+          <div class="flex items-center justify-center gap-1.5">
+            <span class="text-xs font-semibold text-growth bg-growth/10 px-1.5 py-0.5 rounded-full whitespace-nowrap" id="journey-hero-gross-pct">+0%</span>
+            <span class="disp text-lg sm:text-xl font-bold break-words text-ink" id="journey-hero-balance" dir="ltr">₪0</span>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="text-[11px] text-slate-500 mb-1">הכנסה מריבית עד היום</div>
+          <div class="disp text-lg sm:text-xl font-bold break-words text-center text-ink" id="journey-hero-interest" dir="ltr">₪0</div>
+        </div>
+        <div class="text-center">
+          <div class="text-[11px] text-slate-500 mb-1">רווח חודש קודם</div>
+          <div class="disp text-lg sm:text-xl font-bold break-words text-center text-ink" id="journey-hero-lastmonth" dir="ltr">₪0</div>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="flex-1 py-1.5 rounded-lg font-semibold text-xs bg-ink text-white" onclick="goto('invest')">הגדלת התיק</button>
+        <button class="flex-1 py-1.5 rounded-lg font-semibold text-xs border border-line text-ink hover:bg-slate-50" onclick="goto('portfolio')">צפייה בנתוני התיק</button>
+      </div>
+    </div>` : `<div class="flex items-center gap-4 mb-5">
       <div class="flex-1 flex items-center gap-2">
         <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${dDone?'bg-growth text-white':'bg-brand text-ink'}">${dDone?'✓':'1'}</div>
         <span class="text-sm font-semibold hidden sm:inline">הפקידו לחשבון</span>
@@ -1559,17 +2150,27 @@ function renderJourney(){
         <span class="text-sm font-semibold hidden sm:inline">אמתו זהות</span>
         <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${kDone?'bg-growth text-white':(dDone?'bg-brand text-ink':'bg-slate-100 text-slate-400')}">${kDone?'✓':'2'}</div>
       </div>
-    </div>
-    <p class="disp text-xl font-bold mb-2" style="color:${toneColor}">${message}</p>
+    </div>`}
+    ${message ? `<p class="disp text-xl font-bold mb-2" style="color:${toneColor}">${message}</p>` : ''}
     ${journeyState.depositInfo && d==='in_progress' ? `<p class="text-sm text-slate-500 mb-3">${journeyState.depositInfo.route} · ${journeyState.depositInfo.amount.toLocaleString()} ₪${journeyState.depositInfo.monthly?' (חד-פעמי)':''} · ריבית ${journeyState.depositInfo.rate}%${journeyState.depositInfo.monthly?` · + הוראת קבע חודשית של ${journeyState.depositInfo.monthly.toLocaleString()} ₪`:''}</p>` : ''}
     ${cta ? `<button class="btn-brand px-6 py-2.5 rounded-xl font-semibold text-sm" onclick="${ctaAction}">${cta}</button>` : ''}
   `;
+  if(isExistingCustomerDemo){
+    const p = getPortfolioProjection();
+    const gross = p.totalPrincipal + p.totalGrossProfit;
+    const grossPct = (gross - p.totalPrincipal)/p.totalPrincipal*100;
+    const lastMonthProfit = p.perRoute.reduce((s,h)=>s+Math.round(h.currentValue*routes[h.routeKey].rate/12),0);
+    document.getElementById('journey-hero-balance').textContent = '₪'+Math.round(gross).toLocaleString();
+    document.getElementById('journey-hero-gross-pct').textContent = '+'+grossPct.toFixed(1)+'%';
+    document.getElementById('journey-hero-interest').textContent = '₪'+Math.round(p.totalGrossProfit).toLocaleString();
+    document.getElementById('journey-hero-lastmonth').textContent = '₪'+lastMonthProfit.toLocaleString();
+  }
 }
 
 /* ---------- FAQ ---------- */
 const faqItems=[
   {q:'כיצד עובד חשבון הנאמנות?', a:'כספי המשקיעים מנוהלים בחשבון נאמנות נפרד על ידי נאמן חיצוני בלתי תלוי, ואינם מעורבבים עם כספי הפעילות השוטפת של החברה.'},
-  {q:'מהו מנגנון ה-Reinvest?', a:'תשלומי קרן וריבית מושקעים מחדש באופן אוטומטי בהלוואות חדשות במסלול שבחרתם, כל עוד לא הוגשה בקשת משיכה. זוהי ריבית דה ריבית!'},
+  {q:'מהו מנגנון ה-Reinvest?', a:'תשלומי קרן וריבית מושקעים מחדש באופן אוטומטי בהלוואות חדשות במסלול שבחרתם, כל עוד לא הוגשה בקשת משיכה.'},
   {q:'מיהם הלווים?', a:'יחידים ועסקים קטנים-בינוניים שעברו תהליך חיתום ובדיקת סיכון על ידי צוות הסיכונים של החברה.'},
   {q:'האם כל הריבית מועברת למשקיעים?', a:'לא. מנוכים דמי ניהול והפרשה לקופה לערבות הדדית (בשנתיים הראשונות בלבד, במסלולים הרלוונטיים). היתרה מועברת כריבית נטו.'},
   {q:'מה קורה בפיגור בהלוואה?', a:'צוות הגבייה פונה ללווה, ובמידת הצורך ההלוואה עוברת להליך גבייה משפטי. הקופה לערבות הדדית עשויה לקזז חלק מההפסד.'}
@@ -1586,7 +2187,7 @@ function toggleFaq(i){ document.getElementById('faq-a-'+i).classList.toggle('hid
 
 /* ---------- INIT ---------- */
 renderRoutesExplainerCards('routes-carousel', 'dashboard'); renderCarousel('dashboard');
-updateDurationSliderFill(); updateSliderFill();
+updateInvestYearsSliderFill(); updateSliderFill();
 updateInvest(); renderRouteRow(); renderCarousel('invest');
 updateIncomeSliderFill();
 updateIncome();
@@ -1603,6 +2204,7 @@ renderOnboardSteps();
 selectIdMethod('upload');
 selectIdFormat('biometric');
 renderJourney();
+renderPortfolio();
 renderFaq();
 </script>
 </body>
