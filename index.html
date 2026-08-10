@@ -63,7 +63,6 @@
   }
   html.force-mobile aside.desktop-sidebar{ display:none !important; }
   html.force-mobile main{ margin-right:0 !important; padding-left:1rem; padding-right:1rem; max-width:100% !important; }
-  html.force-mobile #manager-popover{ top:64px !important; bottom:auto !important; right:1rem !important; }
   html.force-mobile #profit-net{ font-size:1.5rem !important; }
   html.force-mobile #income-required-amount{ font-size:1.25rem !important; }
   html.force-mobile #total-deposits-stat{ font-size:1.125rem !important; }
@@ -94,9 +93,6 @@
   html.force-mobile #pf-balances-grid{ grid-template-columns:1fr !important; }
   html.force-mobile .pf-route-stat-grid{ grid-template-columns:1fr !important; }
   html.force-mobile .pf-route-secondary-grid{ grid-template-columns:1fr !important; }
-  @media (max-width: 1023px){
-    #manager-popover{ top:64px !important; bottom:auto !important; right:1rem !important; }
-  }
 </style>
 </head>
 <body>
@@ -119,26 +115,19 @@
       <button class="text-slate-400" onclick="closeMobileDrawer()"><span class="material-symbols-outlined">close</span></button>
     </div>
     <nav class="flex flex-col gap-1" id="mobile-nav-items">
-      <div class="nav-item" data-screen="dashboard" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">space_dashboard</span>דשבורד</div>
-      <div class="nav-item" data-screen="portfolio" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">pie_chart</span>התיק שלי</div>
-      <div class="nav-item" data-screen="invest" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">trending_up</span>תכנון השקעה</div>
-      <div class="nav-item" data-screen="income" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">monetization_on</span>הכנסה חודשית קבועה</div>
-      <div class="nav-item" data-screen="savings" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">timeline</span>חיסכון לכל מטרה</div>
-      <div class="nav-item" data-screen="deposits" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">receipt_long</span>ההפקדות שלי</div>
-      <div class="nav-item" data-screen="onboarding" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">verified_user</span>אימות והכרות</div>
-      <div class="nav-item" data-screen="faq" onclick="closeMobileDrawer()"><span class="material-symbols-outlined text-lg">help</span>מרכז המידע</div>
+      <div class="nav-item" data-screen="dashboard" onclick="closeMobileDrawer()">דשבורד</div>
+      <div class="nav-item" data-screen="portfolio" onclick="closeMobileDrawer()">התיק שלי</div>
+      <div class="nav-item" data-screen="invest" onclick="closeMobileDrawer()">תכנון השקעה</div>
+      <div class="nav-item" data-screen="income" onclick="closeMobileDrawer()">הכנסה חודשית קבועה</div>
+      <div class="nav-item" data-screen="savings" onclick="closeMobileDrawer()">חיסכון לכל מטרה</div>
+      <div class="nav-item" data-screen="deposits" onclick="closeMobileDrawer()">ההפקדות שלי</div>
+      <div class="nav-item" data-screen="onboarding" onclick="closeMobileDrawer()">אימות והכרות</div>
+      <div class="nav-item" data-screen="faq" onclick="closeMobileDrawer()">מרכז המידע</div>
     </nav>
     <div class="mt-8 pt-6 border-t border-line space-y-1">
       <button class="w-full flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 text-right">
         <span class="material-symbols-outlined text-slate-500">settings</span>
         <span class="text-sm font-medium">הגדרות</span>
-      </button>
-      <button class="w-full flex items-center gap-2 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-right" id="manager-btn-mobile" onclick="toggleManager()">
-        <div class="w-9 h-9 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold text-xs flex-shrink-0">נ.כ</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-xs font-semibold truncate">נאור כהן</div>
-          <div class="text-[10px] text-slate-400">מנהל התיק שלך</div>
-        </div>
       </button>
     </div>
   </div>
@@ -152,50 +141,21 @@
       </div>
     </div>
     <nav class="flex flex-col gap-1 px-3">
-      <div class="nav-item active" data-screen="dashboard"><span class="material-symbols-outlined text-lg">space_dashboard</span>דשבורד</div>
-      <div class="nav-item" data-screen="portfolio"><span class="material-symbols-outlined text-lg">pie_chart</span>התיק שלי</div>
-      <div class="nav-item" data-screen="invest"><span class="material-symbols-outlined text-lg">trending_up</span>תכנון השקעה</div>
-      <div class="nav-item" data-screen="income"><span class="material-symbols-outlined text-lg">monetization_on</span>הכנסה חודשית קבועה</div>
-      <div class="nav-item" data-screen="savings"><span class="material-symbols-outlined text-lg">timeline</span>חיסכון לכל מטרה</div>
-      <div class="nav-item" data-screen="deposits"><span class="material-symbols-outlined text-lg">receipt_long</span>ההפקדות שלי</div>
-      <div class="nav-item" data-screen="onboarding"><span class="material-symbols-outlined text-lg">verified_user</span>אימות והכרות</div>
-      <div class="nav-item" data-screen="faq"><span class="material-symbols-outlined text-lg">help</span>מרכז המידע</div>
+      <div class="nav-item active" data-screen="dashboard">דשבורד</div>
+      <div class="nav-item" data-screen="portfolio">התיק שלי</div>
+      <div class="nav-item" data-screen="invest">תכנון השקעה</div>
+      <div class="nav-item" data-screen="income">הכנסה חודשית קבועה</div>
+      <div class="nav-item" data-screen="savings">חיסכון לכל מטרה</div>
+      <div class="nav-item" data-screen="deposits">ההפקדות שלי</div>
+      <div class="nav-item" data-screen="onboarding">אימות והכרות</div>
+      <div class="nav-item" data-screen="faq">מרכז המידע</div>
     </nav>
     <div class="mt-auto px-3 space-y-3">
-      <button class="w-full flex items-center gap-2 p-2.5 rounded-xl hover:bg-slate-50 transition-colors text-right" id="manager-btn" onclick="toggleManager()">
-        <div class="w-8 h-8 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold text-xs flex-shrink-0">נ.כ</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-xs font-semibold truncate">נאור כהן</div>
-          <div class="text-[10px] text-slate-400">מנהל התיק שלך</div>
-        </div>
-        <span class="material-symbols-outlined text-slate-300 text-base">chevron_left</span>
-      </button>
       <a class="flex items-center gap-2 px-2.5 text-[11px] text-slate-400 hover:text-brandtext transition-colors" href="#">
         <span class="material-symbols-outlined text-sm">smartphone</span>גם באפליקציה — הורידו את BTB
       </a>
     </div>
   </aside>
-
-  <!-- MANAGER POPOVER -->
-  <div class="hidden fixed bottom-24 right-[236px] w-64 card shadow-xl p-4 z-40" id="manager-popover">
-    <div class="flex items-center gap-3 mb-3">
-      <div class="w-11 h-11 rounded-full bg-brand/10 text-brandtext flex items-center justify-center font-bold">נ.כ</div>
-      <div>
-        <div class="font-semibold text-sm">נאור כהן</div>
-        <a class="text-xs text-brandtext" href="mailto:naorc@btbisrael.co.il">naorc@btbisrael.co.il</a>
-      </div>
-    </div>
-    <div class="flex gap-2">
-      <a class="flex-1 flex flex-col items-center gap-1 bg-growth/5 border border-growth/20 rounded-lg py-2" href="https://wa.me/972507599662" target="_blank" rel="noopener">
-        <span class="material-symbols-outlined text-growth text-lg">chat</span>
-        <span class="text-[11px] font-semibold" dir="ltr">050-7599662</span>
-      </a>
-      <a class="flex-1 flex flex-col items-center gap-1 bg-slate-50 border border-line rounded-lg py-2" href="tel:0732073277">
-        <span class="material-symbols-outlined text-slate-600 text-lg">call</span>
-        <span class="text-[11px] font-semibold" dir="ltr">073-2073277</span>
-      </a>
-    </div>
-  </div>
 
   <!-- MAIN -->
   <main class="flex-1 mr-0 lg:mr-[220px] px-5 lg:px-10 py-6 lg:py-8 max-w-5xl">
@@ -990,7 +950,6 @@ document.querySelectorAll('[data-goto]').forEach(el=>el.addEventListener('click'
 
 function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2200); }
 
-function toggleManager(){ document.getElementById('manager-popover').classList.toggle('hidden'); }
 function openMobileDrawer(){ document.getElementById('mobile-drawer-backdrop').classList.remove('hidden'); document.getElementById('mobile-drawer').classList.add('open'); }
 function closeMobileDrawer(){ document.getElementById('mobile-drawer-backdrop').classList.add('hidden'); document.getElementById('mobile-drawer').classList.remove('open'); }
 function toggleMobilePreview(){
@@ -998,10 +957,6 @@ function toggleMobilePreview(){
   document.getElementById('view-toggle-icon').textContent = isMobile ? 'desktop_windows' : 'smartphone';
   document.getElementById('view-toggle-label').textContent = isMobile ? 'תצוגת דסקטופ' : 'תצוגת מובייל';
 }
-document.addEventListener('click',(e)=>{
-  const pop=document.getElementById('manager-popover'), btn=document.getElementById('manager-btn'), btnMobile=document.getElementById('manager-btn-mobile');
-  if(!pop.classList.contains('hidden') && !pop.contains(e.target) && !btn.contains(e.target) && !btnMobile.contains(e.target)) pop.classList.add('hidden');
-});
 
 /* ---------- SHARED DATA ---------- */
 const routes = {
@@ -2170,7 +2125,7 @@ function renderJourney(){
 /* ---------- FAQ ---------- */
 const faqItems=[
   {q:'כיצד עובד חשבון הנאמנות?', a:'כספי המשקיעים מנוהלים בחשבון נאמנות נפרד על ידי נאמן חיצוני בלתי תלוי, ואינם מעורבבים עם כספי הפעילות השוטפת של החברה.'},
-  {q:'מהו מנגנון ה-Reinvest?', a:'תשלומי קרן וריבית מושקעים מחדש באופן אוטומטי בהלוואות חדשות במסלול שבחרתם, כל עוד לא הוגשה בקשת משיכה.'},
+  {q:'מהו מנגנון ה-Reinvest?', a:'תשלומי קרן וריבית מושקעים מחדש באופן אוטומטי בהלוואות חדשות במסלול שבחרתם, כל עוד לא הוגשה בקשת משיכה. זוהי ריבית דה ריבית!'},
   {q:'מיהם הלווים?', a:'יחידים ועסקים קטנים-בינוניים שעברו תהליך חיתום ובדיקת סיכון על ידי צוות הסיכונים של החברה.'},
   {q:'האם כל הריבית מועברת למשקיעים?', a:'לא. מנוכים דמי ניהול והפרשה לקופה לערבות הדדית (בשנתיים הראשונות בלבד, במסלולים הרלוונטיים). היתרה מועברת כריבית נטו.'},
   {q:'מה קורה בפיגור בהלוואה?', a:'צוות הגבייה פונה ללווה, ובמידת הצורך ההלוואה עוברת להליך גבייה משפטי. הקופה לערבות הדדית עשויה לקזז חלק מההפסד.'}
