@@ -93,6 +93,27 @@
   html.force-mobile #pf-balances-grid{ grid-template-columns:1fr !important; }
   html.force-mobile .pf-route-stat-grid{ grid-template-columns:1fr !important; }
   html.force-mobile .pf-route-secondary-grid{ grid-template-columns:1fr !important; }
+
+  /* ---------- real mobile devices: apply the same layout unconditionally, ----------
+     so the mobile view never depends on the demo toggle above or on the Tailwind
+     CDN script having finished loading in time. */
+  @media (max-width: 1023px){
+    aside.desktop-sidebar{ display:none !important; }
+    main{ margin-right:0 !important; padding-left:1rem; padding-right:1rem; max-width:100% !important; }
+    #profit-net{ font-size:1.5rem !important; }
+    #income-required-amount{ font-size:1.25rem !important; }
+    #total-deposits-stat{ font-size:1.125rem !important; }
+    #hamburger-btn{ display:flex !important; }
+    #settings-btn-header{ display:none !important; }
+    #breakdown-grid{ grid-template-columns:1fr !important; }
+    #savings-results-grid{ grid-template-columns:1fr !important; }
+    #pf-hero-grid{ grid-template-columns:1fr !important; }
+    #pf-deposits-grid{ grid-template-columns:1fr !important; }
+    #pf-purchased-grid{ grid-template-columns:1fr !important; }
+    #pf-balances-grid{ grid-template-columns:1fr !important; }
+    .pf-route-stat-grid{ grid-template-columns:1fr !important; }
+    .pf-route-secondary-grid{ grid-template-columns:1fr !important; }
+  }
 </style>
 </head>
 <body>
