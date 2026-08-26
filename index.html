@@ -139,7 +139,7 @@
       <button class="text-slate-400" onclick="closeMobileDrawer()"><span class="material-symbols-outlined">close</span></button>
     </div>
     <nav class="flex flex-col gap-1" id="mobile-nav-items">
-      <div class="nav-item" data-screen="dashboard" onclick="closeMobileDrawer()">דשבורד</div>
+      <div class="nav-item" data-screen="dashboard" onclick="closeMobileDrawer()">הזדמנויות שלי</div>
       <div class="nav-item" data-screen="portfolio" onclick="closeMobileDrawer()">התיק שלי</div>
       <div class="nav-item" data-screen="invest" onclick="closeMobileDrawer()">תכנון השקעה</div>
       <div class="nav-item" data-screen="income" onclick="closeMobileDrawer()">הכנסה חודשית קבועה</div>
@@ -165,7 +165,7 @@
       </div>
     </div>
     <nav class="flex flex-col gap-1 px-3">
-      <div class="nav-item active" data-screen="dashboard">דשבורד</div>
+      <div class="nav-item active" data-screen="dashboard">הזדמנויות שלי</div>
       <div class="nav-item" data-screen="portfolio">התיק שלי</div>
       <div class="nav-item" data-screen="invest">תכנון השקעה</div>
       <div class="nav-item" data-screen="income">הכנסה חודשית קבועה</div>
@@ -189,7 +189,7 @@
         <button class="lg:hidden w-9 h-9 rounded-full border border-line flex items-center justify-center text-slate-600 flex-shrink-0" id="hamburger-btn" onclick="openMobileDrawer()">
           <span class="material-symbols-outlined">menu</span>
         </button>
-        <h1 class="disp text-2xl lg:text-3xl font-bold" id="page-title">דשבורד</h1>
+        <h1 class="disp text-2xl lg:text-3xl font-bold" id="page-title">הזדמנויות שלי</h1>
       </div>
       <button class="hidden lg:flex w-9 h-9 rounded-full border border-line items-center justify-center text-slate-500 hover:bg-slate-50" id="settings-btn-header"><span class="material-symbols-outlined text-lg">settings</span></button>
     </header>
@@ -977,7 +977,7 @@
 
 <script>
 /* ---------- NAV ---------- */
-const titles = { dashboard:'דשבורד', portfolio:'התיק שלי', invest:'כמה תרצו להשקיע?', income:'כמה תרצו להכניס כל חודש?', savings:'לאיזו מטרה תרצו לחסוך?', 'savings-analysis':'ניתוח השקעה', deposit:'הפקדה', deposits:'ההפקדות שלי', onboarding:'אימות והכרות', faq:'מרכז המידע' };
+const titles = { dashboard:'הזדמנויות שלי', portfolio:'התיק שלי', invest:'כמה תרצו להשקיע?', income:'כמה תרצו להכניס כל חודש?', savings:'לאיזו מטרה תרצו לחסוך?', 'savings-analysis':'ניתוח השקעה', deposit:'הפקדה', deposits:'ההפקדות שלי', onboarding:'אימות והכרות', faq:'מרכז המידע' };
 function switchScreen(screen){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('screen-'+screen).classList.add('active');
