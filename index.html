@@ -312,7 +312,7 @@
       <div class="rounded-2xl p-6 mb-4" style="background:linear-gradient(135deg, #FCA5A5, #F58F8F);">
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="pf-hero-grid">
           <div class="text-center">
-            <div class="text-[11px] text-ink/60 mb-1">סך צבירה ברוטו</div>
+            <div class="text-[11px] text-ink/60 mb-1">שווי תיק</div>
             <div class="flex items-center justify-center gap-1.5">
               <span class="text-xs font-semibold text-growth bg-growth/10 px-1.5 py-0.5 rounded-full whitespace-nowrap" id="pf-hero-gross-pct">+0%</span>
               <span class="disp text-xl sm:text-2xl font-bold break-words text-ink" id="pf-hero-balance" dir="ltr">₪0</span>
@@ -1640,9 +1640,9 @@ function renderPortfolio(){
   const includeRed = document.getElementById('pf-include-red-toggle').checked;
   const netToday = includeRed ? netBeforeRed - redLoss - fundFeeRemainingRounded : netBeforeRed;
 
-  document.getElementById('pf-hero-balance').textContent = '₪'+Math.round(gross).toLocaleString();
-  const grossPct = (gross - p.totalPrincipal)/p.totalPrincipal*100;
-  document.getElementById('pf-hero-gross-pct').textContent = '+'+grossPct.toFixed(1)+'%';
+  document.getElementById('pf-hero-balance').textContent = '₪'+Math.round(netBeforeRed).toLocaleString();
+  const netPct = (netBeforeRed - p.totalPrincipal)/p.totalPrincipal*100;
+  document.getElementById('pf-hero-gross-pct').textContent = '+'+netPct.toFixed(1)+'%';
   document.getElementById('pf-hero-interest').textContent = '₪'+Math.round(p.totalGrossProfit).toLocaleString();
   const totalLastMonthProfit = p.perRoute.reduce((s,h)=>s+Math.round(h.currentValue*routes[h.routeKey].rate/12),0);
   document.getElementById('pf-hero-lastmonth').textContent = '₪'+totalLastMonthProfit.toLocaleString();
@@ -2146,7 +2146,7 @@ function renderJourney(){
     ${isExistingCustomerDemo ? `<div class="mb-5">
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
         <div class="text-center">
-          <div class="text-[11px] text-slate-500 mb-1">סך צבירה ברוטו</div>
+          <div class="text-[11px] text-slate-500 mb-1">שווי תיק</div>
           <div class="flex items-center justify-center gap-1.5">
             <span class="text-xs font-semibold text-growth bg-growth/10 px-1.5 py-0.5 rounded-full whitespace-nowrap" id="journey-hero-gross-pct">+0%</span>
             <span class="disp text-lg sm:text-xl font-bold break-words text-ink" id="journey-hero-balance" dir="ltr">₪0</span>
@@ -2183,10 +2183,12 @@ function renderJourney(){
   if(isExistingCustomerDemo){
     const p = getPortfolioProjection();
     const gross = p.totalPrincipal + p.totalGrossProfit;
-    const grossPct = (gross - p.totalPrincipal)/p.totalPrincipal*100;
+    const tax = Math.round(p.totalGrossProfit * pfTaxRate);
+    const netBeforeRed = gross - p.totalMgmt - p.totalFund - Math.round(p.totalSgFee) - p.totalInterestFee - tax;
+    const netPct = (netBeforeRed - p.totalPrincipal)/p.totalPrincipal*100;
     const lastMonthProfit = p.perRoute.reduce((s,h)=>s+Math.round(h.currentValue*routes[h.routeKey].rate/12),0);
-    document.getElementById('journey-hero-balance').textContent = '₪'+Math.round(gross).toLocaleString();
-    document.getElementById('journey-hero-gross-pct').textContent = '+'+grossPct.toFixed(1)+'%';
+    document.getElementById('journey-hero-balance').textContent = '₪'+Math.round(netBeforeRed).toLocaleString();
+    document.getElementById('journey-hero-gross-pct').textContent = '+'+netPct.toFixed(1)+'%';
     document.getElementById('journey-hero-interest').textContent = '₪'+Math.round(p.totalGrossProfit).toLocaleString();
     document.getElementById('journey-hero-lastmonth').textContent = '₪'+lastMonthProfit.toLocaleString();
   }
