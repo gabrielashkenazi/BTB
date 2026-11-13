@@ -162,6 +162,7 @@ const SOUNDS = [
   { g: 'voice', id: 's20-he-kibalta-glass', name: '"קיבלת תשלום באון!" · Glass', tags: ['עברית', 'קול טיוטה'], desc: 'משפט בעברית על צליל זכוכיתי. הקול הוא טיוטה של Windows.' },
   { g: 'voice', id: 's21-he-hitkabel', name: '"התקבל תשלום באון!"', tags: ['עברית', 'קול טיוטה'], desc: 'משפט בעברית עם פעמון ON. הקול הוא טיוטה של Windows.' },
   { g: 'voice', id: 's22-money-groove', name: 'Money Groove', tags: ['קול AI', 'קצב'], desc: 'לופ קופה במשקל 7, ו-"Payment by ON" נוחת על הפעמה הבאה.' },
+  ...[1, 2, 3, 4, 5, 6, 7, 8].map(n => ({ g: 'coins', id: `c0${n}-coins-${n}`, name: `מטבעות ${n}`, tags: ['מטבעות'], desc: 'הקלטת מטבעות, אחרי ניקוי שקט והגברה.' })),
   { g: 'music', id: 'm01-music-1', file: 'm01-music-1.mp4', name: 'מוזיקה 1', tags: ['מוזיקה'], desc: 'קטע מוזיקלי של כדקה.' },
   { g: 'music', id: 'm02-music-2', file: 'm02-music-2.mp4', name: 'מוזיקה 2', tags: ['מוזיקה'], desc: 'קטע מוזיקלי של כדקה.' },
   { g: 'music', id: 'm03-music-3', file: 'm03-music-3.mp4', name: 'מוזיקה 3', tags: ['מוזיקה'], desc: 'קטע מוזיקלי של כדקה.' },
@@ -171,6 +172,7 @@ const GROUPS = [
   { id: 'family', title: 'משפחת Payment by ON', sub: 'אותו מוטיב חתימה בגרסאות שונות.' },
   { id: 'register', title: 'קופה: Chi Chi Ching ON', sub: 'צליל קופה שנגמר ב-ON.' },
   { id: 'voice', title: 'עם קול', sub: 'משפט מדובר משולב עם הצליל. בעברית הקול הוא עדיין טיוטה.' },
+  { id: 'coins', title: 'מטבעות', sub: 'שמונה הקלטות של מטבעות אמיתיים.' },
   { id: 'music', title: 'מוזיקה', sub: 'קטעי מוזיקה ארוכים יותר, למותג ולסרטונים. הטעינה לוקחת רגע.' },
 ];
 const BY_ID = Object.fromEntries(SOUNDS.map(s => [s.id, s]));
@@ -371,6 +373,7 @@ async function flush() {
 renderVote();
 const DUR = { s01: 1.9, s02: 2.0, s03: 2.0, s04: 2.3, s05: 1.0, s06: 1.1, s07: 3.0, s08: 1.7, s09: 2.8, s10: 2.3, s11: 2.9,
   s12: 2.3, s13: 2.6, s14: 3.4, s15: 2.9, s16: 2.9, s17: 2.1, s18: 2.1, s19: 2.1, s20: 3.2, s21: 3.2, s22: 3.2,
+  c01: 11.8, c02: 12.1, c03: 13.4, c04: 13.4, c05: 13.8, c06: 13.8, c07: 14.5, c08: 13.8,
   m01: 59.5, m02: 61.7, m03: 60.8 };
 const fmtDur = s => s < 10 ? s.toFixed(1) + ' שנ\'' : Math.floor(s / 60) + ':' + String(Math.round(s % 60)).padStart(2, '0') + ' דק\'';
 document.querySelectorAll('[data-dur]').forEach(el => { el.textContent = fmtDur(DUR[el.dataset.dur.slice(0, 3)]); });
