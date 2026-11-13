@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>הצבעת צלילי ON</title>
+<meta name="description" content="האזינו ל-22 צלילי תשלום של ON, דרגו אותם ובחרו מועדפים.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Assistant:wght@400;600;700&display=swap">
+<style>
+  /* Layout: one reading column; a sticky tab bar switches between rating cards and the live results table */
+  :root {
+    --bg: #f4f7f6; --surface: #ffffff; --fg: #10201b; --muted: #5a6b65; --line: #dde6e2;
+    --accent: #0c9a77; --accent-ink: #ffffff; --accent-soft: #e2f4ee; --star: #e7a100; --heart: #e0445e;
+    --font-display: "Rubik", "Assistant", system-ui, sans-serif;
+    --font-body: "Assistant", "Rubik", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #0c1311; --surface: #131d1a; --fg: #e5efeb; --muted: #94a69f; --line: #22322d;
+    --accent: #2fd2a5; --accent-ink: #03140f; --accent-soft: #163029; --star: #ffc53d; --heart: #ff6b83; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #0c1311; --surface: #131d1a; --fg: #e5efeb; --muted: #94a69f; --line: #22322d;
+    --accent: #2fd2a5; --accent-ink: #03140f; --accent-soft: #163029; --star: #ffc53d; --heart: #ff6b83; color-scheme: dark; }
+
+  body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; direction: rtl; }
+  .wrap { max-width: 880px; margin: 0 auto; padding-block: 28px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(26px, 5vw, 34px); }
+  h1 b { color: var(--accent); }
+  .lede { color: var(--muted); margin: 8px 0 0; max-width: 62ch; }
+
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 14px 10px; margin-top: 18px;
+    display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; border-bottom: 1px solid var(--line); }
+  .tabs { display: flex; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 4px; }
+  .tabs button { border: 0; background: transparent; color: var(--muted); font: 600 15px var(--font-body); padding: 7px 16px; border-radius: 999px; cursor: pointer; }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); }
+  .progress { color: var(--muted); font-size: 14px; display: flex; gap: 14px; flex-wrap: wrap; }
+  .progress strong { color: var(--fg); font-variant-numeric: tabular-nums; }
+  .status { margin-inline-start: auto; font-size: 13px; color: var(--muted); }
+  .notice { margin-top: 14px; padding: 10px 14px; border-radius: 10px; background: var(--accent-soft); color: var(--fg); font-size: 14px; }
+
+  section.group { margin-top: 30px; display: grid; gap: 12px; }
+  section.group > header { display: grid; gap: 2px; }
+  section.group > header p { margin: 0; color: var(--muted); font-size: 14px; }
+  .cards { display: grid; gap: 10px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+    display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 14px; align-items: center; }
+  .card.fav { border-color: var(--heart); }
+  .play { width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--accent); color: var(--accent-ink); cursor: pointer;
+    display: grid; place-items: center; grid-row: span 2; }
+  .play svg { width: 18px; height: 18px; fill: currentColor; }
+  .play.playing { background: var(--fg); color: var(--bg); }
+  .name { font: 700 17px var(--font-display); display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; min-width: 0; }
+  .tags { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font: 600 12px var(--font-body); color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; font-variant-numeric: tabular-nums; }
+  .desc { grid-column: 2 / 3; color: var(--muted); font-size: 14px; margin: 0; min-width: 0; }
+  .rate { grid-column: 3; grid-row: 1 / span 2; display: flex; align-items: center; gap: 10px; }
+  .stars { display: flex; direction: ltr; }
+  .stars button { border: 0; background: none; padding: 2px; cursor: pointer; color: var(--line); }
+  .stars button svg { width: 24px; height: 24px; fill: currentColor; display: block; }
+  .stars button.on { color: var(--star); }
+  .heart { border: 0; background: none; cursor: pointer; padding: 4px; color: var(--line); }
+  .heart svg { width: 24px; height: 24px; fill: currentColor; display: block; }
+  .heart.on { color: var(--heart); }
+  button:disabled { cursor: default; opacity: .55; }
+  button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+  /* results */
+  .winner { margin-top: 26px; background: var(--surface); border: 2px solid var(--accent); border-radius: 16px; padding: 18px 20px;
+    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; align-items: center; }
+  .winner .label { font: 600 13px var(--font-body); letter-spacing: .04em; color: var(--accent); }
+  .winner h2 { font-size: 22px; }
+  .winner p { margin: 0; color: var(--muted); }
+  .voters { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
+  .voter { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px 2px 3px; color: var(--fg); }
+  .voter img { width: 22px; height: 22px; border-radius: 50%; }
+  .tablewrap { margin-top: 18px; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+  table { width: 100%; border-collapse: collapse; min-width: 560px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: start; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font: 600 13px var(--font-body); color: var(--muted); letter-spacing: .03em; }
+  tr:last-child td { border-bottom: 0; }
+  td.rank { font: 700 16px var(--font-display); color: var(--muted); width: 36px; }
+  tr.top td.rank { color: var(--accent); }
+  .meter { display: flex; align-items: center; gap: 8px; }
+  .meter span { flex: 0 0 auto; width: 34px; }
+  .meter i { display: block; height: 8px; border-radius: 4px; background: var(--accent); }
+  .meter .track { flex: 1; min-width: 80px; background: var(--accent-soft); border-radius: 4px; }
+  .mini { width: 32px; height: 32px; grid-row: auto; }
+  .mini svg { width: 13px; height: 13px; }
+  .empty { margin-top: 26px; padding: 22px; text-align: center; color: var(--muted); background: var(--surface); border: 1px dashed var(--line); border-radius: 14px; }
+
+  @media (max-width: 620px) {
+    .card { grid-template-columns: auto minmax(0, 1fr); }
+    .rate { grid-column: 1 / -1; grid-row: auto; justify-content: space-between; margin-top: 6px; }
+    .desc { grid-column: 2; }
+  }
+  @media (prefers-reduced-motion: no-preference) { .play, .stars button, .heart { transition: transform .12s, background .12s, color .12s; } .stars button:active, .heart:active { transform: scale(.88); } }
+</style>
+<style>
+  html { color-scheme: light; }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+  * { box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>איזה צליל ישמעו כשנכנס תשלום ב-<b>ON</b>?</h1>
+  <p class="lede">האזינו לכל צליל, דרגו אותו מ-1 עד 5 כוכבים, וסמנו בלב עד 3 מועדפים. ההצבעה אנונימית ונשמרת אוטומטית, ואפשר לשנות אותה מתי שרוצים. בלשונית התוצאות רואים את הדירוג של כל המצביעים.</p>
+
+  <div class="bar">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tabVote" aria-selected="true">הצבעה</button>
+      <button role="tab" id="tabResults" aria-selected="false">תוצאות</button>
+    </div>
+    <div class="progress">
+      <span>דירגת <strong id="ratedCount">0</strong> מתוך <strong id="totalCount">0</strong></span>
+      <span>מועדפים <strong id="favCount">0</strong>/3</span>
+    </div>
+    <span class="status" id="status" aria-live="polite"></span>
+  </div>
+  <div class="notice" id="notice" hidden></div>
+
+  <div id="votePane"></div>
+  <div id="resultsPane" hidden></div>
+</div>
+
+<script>
+const SOUNDS = [
+  { g: 'base', id: 's01-payment-by-on', name: 'Payment by ON', tags: ['צליל חתימה'], desc: '"O" עגול שמחליק למעלה, ואחריו "N" פעמון בהיר, עם נחיתה נמוכה וניצוצות.' },
+  { g: 'base', id: 's02-coin-landing', name: 'מטבע נוחת', tags: [], desc: 'מטבע מתכתי שקופץ ומתייצב, עם צלצול אחרון ארוך.' },
+  { g: 'base', id: 's03-digital-register', name: 'קופה דיגיטלית', tags: [], desc: 'קליק מגירה, ארפג\'ו עולה ואקורד פעמונים רך.' },
+  { g: 'base', id: 's04-power-on', name: 'Power ON', tags: [], desc: 'סוויפ סינתיסייזר שעולה ו"נדלק" לתוך אקורד בהיר.' },
+  { g: 'base', id: 's05-pulse-on', name: 'Pulse ON', tags: ['קצר'], desc: 'שני בליפים עדינים בקצב "אוֹ-ן". לא מעייף גם אחרי עשרות תשלומים.' },
+  { g: 'family', id: 's06-tap', name: 'Payment by ON · Tap', tags: ['קצר'], desc: 'אותו מוטיב, קצר וחד, לנוטיפיקציות.' },
+  { g: 'family', id: 's07-premium', name: 'Payment by ON · Premium', tags: [], desc: 'נמוך, חם ורחב. מרגיש יוקרתי.' },
+  { g: 'family', id: 's08-pop', name: 'Payment by ON · Pop', tags: [], desc: 'גבוה, מהיר ומתכתי, עם הרבה ניצוצות.' },
+  { g: 'family', id: 's09-jackpot', name: 'Payment by ON · Jackpot', tags: ['תשלום גדול'], desc: 'הד באוקטבה, אקורד תומך ומפל ניצוצות.' },
+  { g: 'family', id: 's10-rolling-o', name: 'Payment by ON · Rolling O', tags: [], desc: 'ה-O מסתלסל כמו מטבע מסתובב, ואז ה-N נוחת.' },
+  { g: 'register', id: 's11-ching-on', name: 'Chi Chi Ching ON', tags: [], desc: 'שתי הקשות, פעמון קופה ומגירה, ומוטיב ON שסוגר.' },
+  { g: 'register', id: 's12-ching-on-fast', name: 'Ching-ON מהיר', tags: ['קצר'], desc: 'ה-ON נוחת בתוך הזנב של ה"צ\'ינג", כמו מילה אחת.' },
+  { g: 'register', id: 's13-ching-spoken-on', name: 'Chi Chi Ching + "ON!"', tags: ['קול AI'], desc: 'אחרי ה"צ\'ינג" קול אומר "ON!".' },
+  { g: 'register', id: 's14-ching-on-jackpot', name: 'Chi Chi Ching ON · Jackpot', tags: ['תשלום גדול'], desc: 'שלוש הקשות, "צ\'ינג" כפול ומפל מטבעות.' },
+  { g: 'voice', id: 's15-payment-by-on-ryan', name: '"Payment by ON" · Ryan', tags: ['קול AI', 'אנגלית'], desc: 'קול גברי בטוח. פעמון ה-N נוחת על המילה "ON".' },
+  { g: 'voice', id: 's16-payment-by-on-serena', name: '"Payment by ON" · Serena', tags: ['קול AI', 'אנגלית'], desc: 'קול נשי חם. פעמון ה-N נוחת על המילה "ON".' },
+  { g: 'voice', id: 's17-on-payment-ryan', name: '"ON Payment" · Ryan', tags: ['קול AI', 'אנגלית'], desc: '"ON!" ואחריו "Payment", עם הפעמון על ה-ON.' },
+  { g: 'voice', id: 's18-on-glass-ryan', name: '"ON!" · Glass · Ryan', tags: ['קול AI', 'סגנון נוטיפיקציה'], desc: 'צליל זכוכיתי ונקי, והמילה "ON!" עליו.' },
+  { g: 'voice', id: 's19-on-glass-serena', name: '"ON!" · Glass · Serena', tags: ['קול AI', 'סגנון נוטיפיקציה'], desc: 'אותו דבר בקול נשי.' },
+  { g: 'voice', id: 's20-he-kibalta-glass', name: '"קיבלת תשלום באון!" · Glass', tags: ['עברית', 'קול טיוטה'], desc: 'משפט בעברית על צליל זכוכיתי. הקול הוא טיוטה של Windows.' },
+  { g: 'voice', id: 's21-he-hitkabel', name: '"התקבל תשלום באון!"', tags: ['עברית', 'קול טיוטה'], desc: 'משפט בעברית עם פעמון ON. הקול הוא טיוטה של Windows.' },
+  { g: 'voice', id: 's22-money-groove', name: 'Money Groove', tags: ['קול AI', 'קצב'], desc: 'לופ קופה במשקל 7, ו-"Payment by ON" נוחת על הפעמה הבאה.' },
+];
+const GROUPS = [
+  { id: 'base', title: 'צלילים בסיסיים', sub: 'חמישה כיוונים שונים לצליל תשלום, בלי קול.' },
+  { id: 'family', title: 'משפחת Payment by ON', sub: 'אותו מוטיב חתימה בגרסאות שונות.' },
+  { id: 'register', title: 'קופה: Chi Chi Ching ON', sub: 'צליל קופה שנגמר ב-ON.' },
+  { id: 'voice', title: 'עם קול', sub: 'משפט מדובר משולב עם הצליל. בעברית הקול הוא עדיין טיוטה.' },
+];
+const BY_ID = Object.fromEntries(SOUNDS.map(s => [s.id, s]));
+const MAX_FAVS = 3;
+
+/* ---------- icons ---------- */
+const I_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12-7.5z"/></svg>';
+const I_STOP = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>';
+const I_STAR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg>';
+const I_HEART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.7 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg>';
+
+/* ---------- state ---------- */
+// Each browser gets an anonymous voter id; its ballot is kept locally and sent to /api/vote.
+let mine = { ratings: {}, favorites: [] };
+let canWrite = true, view = 'vote', voterId = null;
+try { voterId = localStorage.getItem('on-voter-id'); } catch (e) {}
+if (!voterId) { voterId = crypto.randomUUID(); try { localStorage.setItem('on-voter-id', voterId); } catch (e) {} }
+try {
+  const saved = JSON.parse(localStorage.getItem('on-vote') || 'null');
+  if (saved) mine = { ratings: saved.ratings || {}, favorites: (saved.favorites || []).slice(0, MAX_FAVS) };
+} catch (e) {}
+function persistLocal() { try { localStorage.setItem('on-vote', JSON.stringify(mine)); } catch (e) {} }
+
+/* ---------- audio ---------- */
+let actx, current = null; const decoded = {};
+async function play(id, btn) {
+  if (current && current.id === id) { stop(); return; }
+  stop();
+  try {
+    actx = actx || new AudioContext(); await actx.resume();
+    if (!decoded[id]) decoded[id] = await actx.decodeAudioData(await (await fetch(`sounds/${id}.wav`)).arrayBuffer());
+    const src = actx.createBufferSource(); src.buffer = decoded[id]; src.connect(actx.destination);
+    src.onended = () => { if (current && current.src === src) { current = null; paintPlaying(); } };
+    src.start(); current = { id, src }; paintPlaying();
+  } catch (e) { setStatus('לא הצלחנו להשמיע את הצליל. נסו שוב.'); }
+}
+function stop() { if (current) { try { current.src.stop(); } catch (e) {} current = null; paintPlaying(); } }
+function paintPlaying() {
+  document.querySelectorAll('.play').forEach(b => {
+    const on = current && current.id === b.dataset.id;
+    b.classList.toggle('playing', !!on); b.innerHTML = on ? I_STOP : I_PLAY;
+    b.setAttribute('aria-label', (on ? 'עצור: ' : 'נגן: ') + BY_ID[b.dataset.id].name);
+  });
+}
+function playBtn(id, cls = '') { return `<button class="play ${cls}" data-id="${id}" aria-label="נגן: ${BY_ID[id].name}">${I_PLAY}</button>`; }
+
+/* ---------- vote view ---------- */
+function renderVote() {
+  const pane = document.getElementById('votePane');
+  pane.innerHTML = GROUPS.map(g => `
+    <section class="group"><header><h2>${g.title}</h2><p>${g.sub}</p></header>
+      <div class="cards">${SOUNDS.filter(s => s.g === g.id).map(s => `
+        <article class="card" data-id="${s.id}">
+          ${playBtn(s.id)}
+          <div class="name">${s.name}<span class="tags">${s.tags.map(t => `<span class="tag">${t}</span>`).join('')}<span class="tag" data-dur="${s.id}"></span></span></div>
+          <p class="desc">${s.desc}</p>
+          <div class="rate">
+            <div class="stars" role="group" aria-label="דירוג ${s.name}">${[1, 2, 3, 4, 5].map(n =>
+              `<button data-id="${s.id}" data-n="${n}" aria-label="${n} כוכבים">${I_STAR}</button>`).join('')}</div>
+            <button class="heart" data-id="${s.id}" aria-label="מועדף: ${s.name}">${I_HEART}</button>
+          </div>
+        </article>`).join('')}</div>
+    </section>`).join('');
+  paintMine();
+}
+function paintMine() {
+  document.querySelectorAll('.card').forEach(card => {
+    const id = card.dataset.id, r = mine.ratings[id] || 0, fav = mine.favorites.includes(id);
+    card.classList.toggle('fav', fav);
+    card.querySelectorAll('.stars button').forEach(b => { const on = +b.dataset.n <= r; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on && +b.dataset.n === r); b.disabled = !canWrite; });
+    const h = card.querySelector('.heart'); h.classList.toggle('on', fav); h.setAttribute('aria-pressed', fav); h.disabled = !canWrite;
+  });
+  document.getElementById('ratedCount').textContent = Object.keys(mine.ratings).length;
+  document.getElementById('totalCount').textContent = SOUNDS.length;
+  document.getElementById('favCount').textContent = mine.favorites.length;
+}
+
+/* ---------- results view ---------- */
+let remote = null, resultsTimer = null; // remote = { voters, stats } from /api/results
+function tally() {
+  const stats = (remote && remote.stats) || {};
+  const rows = SOUNDS.map(s => { const st = stats[s.id] || { sum: 0, n: 0, favs: 0 }; return { s, sum: st.sum, n: st.n, favs: st.favs }; });
+  // Weighted score: each sound's average is pulled toward the overall average by 2 "virtual" votes,
+  // so one lone 5-star doesn't beat a sound many people rated highly; each favorite adds 0.25.
+  const tot = rows.reduce((a, r) => ({ s: a.s + r.sum, n: a.n + r.n }), { s: 0, n: 0 });
+  const prior = tot.n ? tot.s / tot.n : 3, M = 2;
+  rows.forEach(r => {
+    r.avg = r.n ? r.sum / r.n : 0;
+    r.score = (r.n || r.favs) ? (r.sum + M * prior) / (r.n + M) + 0.25 * r.favs : 0;
+  });
+  rows.sort((a, b) => b.score - a.score || b.n - a.n);
+  return { rows, voters: (remote && remote.voters) || 0 };
+}
+function renderResults() {
+  const pane = document.getElementById('resultsPane');
+  if (!remote) { pane.innerHTML = '<div class="empty">טוען תוצאות…</div>'; return; }
+  const { rows, voters } = tally();
+  if (!voters) { pane.innerHTML = '<div class="empty">עדיין אין הצבעות. אחרי שמישהו ידרג צליל, התוצאות יופיעו כאן.</div>'; return; }
+  const w = rows[0];
+  pane.innerHTML = `
+    <div class="winner">
+      ${playBtn(w.s.id)}
+      <div><div class="label">מוביל כרגע</div><h2>${w.s.name}</h2>
+        <p>ציון משוקלל ${w.score.toFixed(2)} · ממוצע ${w.avg.toFixed(2)} מתוך ${w.n} דירוגים · ${w.favs} סימנו כמועדף</p></div>
+    </div>
+    <div class="voters"><span>${voters === 1 ? 'אדם אחד הצביע' : voters + ' אנשים הצביעו'} · מתעדכן כל 15 שניות</span></div>
+    <p class="lede">הציון המשוקלל הוא ממוצע הכוכבים, מתוקן לפי מספר המדרגים (צליל שדירג רק אדם אחד לא יעקוף צליל שרבים דירגו גבוה), ועוד 0.25 על כל לב.</p>
+    <div class="tablewrap"><table>
+      <thead><tr><th>#</th><th></th><th>צליל</th><th>ציון משוקלל</th><th>ממוצע</th><th>דירוגים</th><th>מועדפים</th></tr></thead>
+      <tbody>${rows.map((r, i) => `
+        <tr class="${i === 0 ? 'top' : ''}">
+          <td class="rank">${i + 1}</td>
+          <td>${playBtn(r.s.id, 'mini')}</td>
+          <td>${r.s.name}</td>
+          <td><div class="meter"><span>${r.score ? r.score.toFixed(2) : '–'}</span><div class="track"><i style="width:${Math.min(100, (r.score / 5) * 100)}%"></i></div></div></td>
+          <td>${r.n ? r.avg.toFixed(2) : '–'}</td>
+          <td>${r.n}</td>
+          <td>${r.favs ? '♥ ' + r.favs : '–'}</td>
+        </tr>`).join('')}</tbody>
+    </table></div>`;
+  paintPlaying();
+}
+async function loadResults() {
+  try {
+    const r = await fetch('/api/results', { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    remote = await r.json();
+  } catch (e) {
+    if (!remote) { document.getElementById('resultsPane').innerHTML = '<div class="empty">לא הצלחנו לטעון את התוצאות. נסו לרענן את העמוד.</div>'; return; }
+  }
+  if (view === 'results') renderResults();
+}
+
+/* ---------- tabs & events ---------- */
+function show(v) {
+  view = v;
+  document.getElementById('tabVote').setAttribute('aria-selected', v === 'vote');
+  document.getElementById('tabResults').setAttribute('aria-selected', v === 'results');
+  document.getElementById('votePane').hidden = v !== 'vote';
+  document.getElementById('resultsPane').hidden = v !== 'results';
+  clearInterval(resultsTimer);
+  if (v === 'results') { renderResults(); loadResults(); resultsTimer = setInterval(loadResults, 15000); }
+  try { localStorage.setItem('on-vote-tab', v); } catch (e) {}
+}
+document.getElementById('tabVote').onclick = () => show('vote');
+document.getElementById('tabResults').onclick = () => show('results');
+
+document.addEventListener('click', e => {
+  const p = e.target.closest('.play'); if (p) return play(p.dataset.id, p);
+  if (!canWrite) return;
+  const star = e.target.closest('.stars button');
+  if (star) {
+    const id = star.dataset.id, n = +star.dataset.n;
+    if (mine.ratings[id] === n) delete mine.ratings[id]; else mine.ratings[id] = n; // tap the same star again to clear
+    paintMine(); queueSave(); return;
+  }
+  const h = e.target.closest('.heart');
+  if (h) {
+    const id = h.dataset.id, i = mine.favorites.indexOf(id);
+    if (i >= 0) mine.favorites.splice(i, 1);
+    else if (mine.favorites.length >= MAX_FAVS) { setStatus('אפשר לסמן עד 3 מועדפים. הסירו לב מצליל אחר קודם.'); return; }
+    else mine.favorites.push(id);
+    paintMine(); queueSave();
+  }
+});
+
+/* ---------- saving: one request at a time, coalesced ---------- */
+let saveTimer = null, saving = false, dirty = false;
+function setStatus(t) { document.getElementById('status').textContent = t; }
+function showNotice(t) { const n = document.getElementById('notice'); n.textContent = t; n.hidden = false; }
+function queueSave() { persistLocal(); dirty = true; setStatus('שומר…'); clearTimeout(saveTimer); saveTimer = setTimeout(flush, 700); }
+async function flush() {
+  if (saving || !dirty) return;
+  saving = true; dirty = false;
+  let failed = false;
+  try {
+    const r = await fetch('/api/vote', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ voterId, ratings: mine.ratings, favorites: mine.favorites }),
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    if (!dirty) setStatus('ההצבעה נשמרה');
+  } catch (e) {
+    failed = true; dirty = true;
+    setStatus('השמירה נכשלה. ננסה שוב בעוד כמה שניות.');
+    clearTimeout(saveTimer); saveTimer = setTimeout(flush, 4000);
+  } finally {
+    saving = false;
+    if (dirty && !failed) flush();
+  }
+}
+
+/* ---------- boot ---------- */
+renderVote();
+const DUR = { s01: 1.9, s02: 2.0, s03: 2.0, s04: 2.3, s05: 1.0, s06: 1.1, s07: 3.0, s08: 1.7, s09: 2.8, s10: 2.3, s11: 2.9,
+  s12: 2.3, s13: 2.6, s14: 3.4, s15: 2.9, s16: 2.9, s17: 2.1, s18: 2.1, s19: 2.1, s20: 3.2, s21: 3.2, s22: 3.2 };
+document.querySelectorAll('[data-dur]').forEach(el => { el.textContent = DUR[el.dataset.dur.slice(0, 3)].toFixed(1) + ' שנ\''; });
+try { if (localStorage.getItem('on-vote-tab') === 'results') show('results'); } catch (e) {}
+// a ballot saved locally but not yet confirmed (e.g. the tab closed mid-save) is re-sent once on load
+if (Object.keys(mine.ratings).length || mine.favorites.length) { dirty = true; flush(); }
+</script>
+</body>
+</html>

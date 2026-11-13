@@ -1,0 +1,12 @@
+# Netlify site for the ON sound vote. In Netlify, set "Base directory" to: on-sounds
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/sounds/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
