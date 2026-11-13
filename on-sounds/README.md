@@ -1,6 +1,6 @@
 # ON sound vote
 
-Public page where anyone with the link listens to 22 candidate payment sounds for ON, rates them 1–5, marks up to 3 favorites, and sees the live ranking. Voting is anonymous: each browser gets a random id.
+Public page where anyone with the link listens to 22 candidate payment sounds and 3 music tracks for ON, rates them 1–5, marks up to 3 favorites, and sees the live ranking. Voting is anonymous: each browser gets a random id.
 
 ## Deploy on Netlify
 
@@ -13,5 +13,5 @@ Votes are stored in Netlify Blobs (store `on-sound-votes`) by `netlify/functions
 ## Files
 
 - `index.html` – the page
-- `sounds/` – the 22 candidates (WAV, 44.1 kHz)
+- `sounds/` – the 22 sound candidates (WAV, 44.1 kHz) and 3 music tracks (MP4, played as audio)
 - `lib/sounds.mjs` – the list of valid sound ids, shared by both functions

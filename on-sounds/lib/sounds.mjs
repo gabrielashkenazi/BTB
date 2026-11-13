@@ -5,6 +5,7 @@ export const SOUND_IDS = [
   's11-ching-on', 's12-ching-on-fast', 's13-ching-spoken-on', 's14-ching-on-jackpot',
   's15-payment-by-on-ryan', 's16-payment-by-on-serena', 's17-on-payment-ryan', 's18-on-glass-ryan',
   's19-on-glass-serena', 's20-he-kibalta-glass', 's21-he-hitkabel', 's22-money-groove',
+  'm01-music-1', 'm02-music-2', 'm03-music-3',
 ];
 export const MAX_FAVORITES = 3;
 export const STORE_NAME = 'on-sound-votes';
