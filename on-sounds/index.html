@@ -10,25 +10,31 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Assistant:wght@400;600;700&display=swap">
 <style>
   /* Layout: one reading column; a sticky tab bar switches between rating cards and the live results table */
+  /* ON brand: deep navy, hot pink, mint teal, and the blue→purple→pink "ON" gradient – used sparingly */
   :root {
-    --bg: #f4f7f6; --surface: #ffffff; --fg: #10201b; --muted: #5a6b65; --line: #dde6e2;
-    --accent: #0c9a77; --accent-ink: #ffffff; --accent-soft: #e2f4ee; --star: #e7a100; --heart: #e0445e;
+    --bg: #f5f6fb; --surface: #ffffff; --fg: #121a3a; --muted: #5d6688; --line: #e2e5f0;
+    --accent: #e3197c; --accent-ink: #ffffff; --accent-soft: #ffe5f0; --teal: #0fb89a; --teal-soft: #dcf7f1;
+    --star: #f2a516; --heart: #e3197c;
+    --brand-gradient: linear-gradient(90deg, #3b5bff, #9b3cff 50%, #ff2e88);
     --font-display: "Rubik", "Assistant", system-ui, sans-serif;
     --font-body: "Assistant", "Rubik", system-ui, sans-serif;
   }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-    --bg: #0c1311; --surface: #131d1a; --fg: #e5efeb; --muted: #94a69f; --line: #22322d;
-    --accent: #2fd2a5; --accent-ink: #03140f; --accent-soft: #163029; --star: #ffc53d; --heart: #ff6b83; color-scheme: dark; } }
+    --bg: #0b1430; --surface: #121e44; --fg: #f1f3ff; --muted: #9ba6cf; --line: #23315f;
+    --accent: #ff3d95; --accent-ink: #ffffff; --accent-soft: #2b1c4c; --teal: #2ee6c8; --teal-soft: #123a4a;
+    --star: #ffc53d; --heart: #ff3d95; color-scheme: dark; } }
   :root[data-theme="dark"] {
-    --bg: #0c1311; --surface: #131d1a; --fg: #e5efeb; --muted: #94a69f; --line: #22322d;
-    --accent: #2fd2a5; --accent-ink: #03140f; --accent-soft: #163029; --star: #ffc53d; --heart: #ff6b83; color-scheme: dark; }
+    --bg: #0b1430; --surface: #121e44; --fg: #f1f3ff; --muted: #9ba6cf; --line: #23315f;
+    --accent: #ff3d95; --accent-ink: #ffffff; --accent-soft: #2b1c4c; --teal: #2ee6c8; --teal-soft: #123a4a;
+    --star: #ffc53d; --heart: #ff3d95; color-scheme: dark; }
+  .brandline { height: 4px; border-radius: 4px; background: var(--brand-gradient); margin-bottom: 22px; width: 72px; }
 
   body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; direction: rtl; }
   .wrap { max-width: 880px; margin: 0 auto; padding-block: 28px 64px;
     padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; }
   h1 { font-size: clamp(26px, 5vw, 34px); }
-  h1 b { color: var(--accent); }
+  h1 b { color: var(--accent); background: var(--brand-gradient); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   .lede { color: var(--muted); margin: 8px 0 0; max-width: 62ch; }
 
   body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
@@ -69,9 +75,9 @@
   button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
   /* results */
-  .winner { margin-top: 26px; background: var(--surface); border: 2px solid var(--accent); border-radius: 16px; padding: 18px 20px;
+  .winner { margin-top: 26px; background: var(--surface); border: 2px solid var(--teal); border-radius: 16px; padding: 18px 20px;
     display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; align-items: center; }
-  .winner .label { font: 600 13px var(--font-body); letter-spacing: .04em; color: var(--accent); }
+  .winner .label { font: 600 13px var(--font-body); letter-spacing: .04em; color: var(--teal); }
   .winner h2 { font-size: 22px; }
   .winner p { margin: 0; color: var(--muted); }
   .voters { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
@@ -83,11 +89,11 @@
   th { font: 600 13px var(--font-body); color: var(--muted); letter-spacing: .03em; }
   tr:last-child td { border-bottom: 0; }
   td.rank { font: 700 16px var(--font-display); color: var(--muted); width: 36px; }
-  tr.top td.rank { color: var(--accent); }
+  tr.top td.rank { color: var(--teal); }
   .meter { display: flex; align-items: center; gap: 8px; }
   .meter span { flex: 0 0 auto; width: 34px; }
-  .meter i { display: block; height: 8px; border-radius: 4px; background: var(--accent); }
-  .meter .track { flex: 1; min-width: 80px; background: var(--accent-soft); border-radius: 4px; }
+  .meter i { display: block; height: 8px; border-radius: 4px; background: var(--teal); }
+  .meter .track { flex: 1; min-width: 80px; background: var(--teal-soft); border-radius: 4px; }
   .mini { width: 32px; height: 32px; grid-row: auto; }
   .mini svg { width: 13px; height: 13px; }
   .credit { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--line); text-align: center; color: var(--muted); font-size: 14px; }
@@ -109,6 +115,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div class="brandline" aria-hidden="true"></div>
   <h1>איזה צליל ישמעו כשנכנס תשלום ב-<b>ON</b>?</h1>
   <p class="lede">האזינו לכל צליל, דרגו אותו מ-1 עד 5 כוכבים, וסמנו בלב עד 3 מועדפים. ההצבעה אנונימית ונשמרת אוטומטית, ואפשר לשנות אותה מתי שרוצים. בלשונית התוצאות רואים את הדירוג של כל המצביעים.</p>
 
