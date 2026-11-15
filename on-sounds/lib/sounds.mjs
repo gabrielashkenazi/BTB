@@ -7,7 +7,7 @@ export const SOUND_IDS = [
   's19-on-glass-serena', 's20-he-kibalta-glass', 's21-he-hitkabel', 's22-money-groove',
   'c01-coins-1', 'c02-coins-2', 'c03-coins-3', 'c04-coins-4', 'c05-coins-5', 'c06-coins-6', 'c07-coins-7', 'c08-coins-8',
   'm01-music-1', 'm02-music-2', 'm03-music-3',
-  'r01-money-ringtone', 'r02-money-notification',
+  'r03-real-ringtone', 'r04-real-ringtone-bass', 'r05-real-notification',
 ];
 export const MAX_FAVORITES = 3;
 export const STORE_NAME = 'on-sound-votes';
